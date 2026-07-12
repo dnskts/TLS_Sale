@@ -1,5 +1,0 @@
-dash
-plotly
-pandas
-openpyxl
-python-dateutil

@@ -103,6 +103,12 @@ body {
   color: #111111 !important;
 }
 
+.vertical-tabs .tab-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .sidebar-footer {
   font-size: 11px;
   color: var(--muted);
@@ -721,6 +727,106 @@ body {
   font-size: 13px;
 }
 
+.validation-warning-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #fed7aa;
+}
+
+.validation-warning-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.validation-warning-text {
+  flex: 1;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.btn-dismiss-warning {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.validation-hidden-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.settings-page-size-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.settings-page-size-dropdown {
+  width: 100px;
+}
+
+.settings-section-teams {
+  margin-top: 8px;
+}
+
+.settings-teams-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.settings-teams-actions .btn-secondary,
+.settings-teams-actions .btn-danger {
+  width: auto;
+}
+
+.settings-teams-datatable {
+  max-width: 480px;
+}
+
+.settings-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.settings-header-row h2 {
+  margin: 0;
+}
+
+.settings-header-row .btn-secondary {
+  width: auto;
+  min-width: 90px;
+}
+
+.settings-auth-panel {
+  max-width: 420px;
+}
+
+.settings-auth-panel .btn-primary {
+  width: auto;
+  min-width: 120px;
+  margin-top: 8px;
+}
+
+.tab-panel-settings {
+  margin-top: 0;
+}
+
 .settings-empty {
   padding: 24px;
   text-align: center;
@@ -985,6 +1091,14 @@ body {
 
   .charts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .charts-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-slot-span-2 {
+    grid-column: span 2;
   }
 
   .tables-grid {

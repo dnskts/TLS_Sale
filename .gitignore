@@ -1,14 +1,3 @@
-# Python
-.venv/
-__pycache__/
-*.py[cod]
-*.pyo
-.Python
-*.egg-info/
-.eggs/
-dist/
-build/
-
 # IDE / OS
 .vscode/
 .idea/
@@ -20,10 +9,13 @@ Thumbs.db
 data/dashboard.db
 data/last_load.json
 data/backups/
+data/tables/
+settings.json.tmp
 
 # Input exports (place locally, not in git)
 input/*.xlsx
 input/*.xls
+!input/.gitkeep
 
 # Root Excel dumps
 *.xlsx
@@ -35,3 +27,7 @@ debug*.log
 # Env secrets
 .env
 .env.*
+
+.venv/
+__pycache__/
+*.pyc

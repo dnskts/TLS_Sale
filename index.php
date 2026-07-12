@@ -1,74 +1,163 @@
 <?php
+/**
+ * index.php
+ *
+ * Главная страница дашборда (чистый PHP, без Python).
+ * Слева — меню вкладок, сверху — фильтры и KPI, справа — содержимое вкладки.
+ * Данные подгружаются через api/*.php скриптом assets/js/app.js
+ */
 declare(strict_types=1);
 
-$settingsPath = __DIR__ . DIRECTORY_SEPARATOR . 'settings.json';
+require_once __DIR__ . '/lib/bootstrap.php';
+require_lib('settings.php');
+require_lib('storage.php');
 
-if (!is_readable($settingsPath)) {
-    http_response_code(500);
-    header('Content-Type: text/html; charset=utf-8');
-    echo '<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>Ошибка</title></head><body>';
-    echo '<h1>Не найден settings.json</h1>';
-    echo '<p>Разместите файл настроек в корне проекта.</p></body></html>';
-    exit;
+$title = 'Дашборд продаж РС ТЛС';
+try {
+    $settings = load_settings();
+    $title = $settings['app']['title'] ?? $title;
+} catch (Throwable $e) {
+    // settings может отсутствовать при первом заходе
 }
-
-$settings = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
-$host = $settings['app']['host'] ?? '127.0.0.1';
-$port = (int) ($settings['app']['port'] ?? 8050);
-$dashUrl = $settings['app']['dash_url'] ?? ('http://127.0.0.1:' . $port);
-$title = $settings['app']['title'] ?? 'Дашборд продаж РС ТЛС';
-
-$checkHost = ($host === '0.0.0.0' || $host === '::') ? '127.0.0.1' : $host;
-$socket = @fsockopen($checkHost, $port, $errno, $errstr, 0.3);
-
-if ($socket !== false) {
-    fclose($socket);
-    header('Location: ' . $dashUrl, true, 302);
-    exit;
+$meta = [];
+try {
+    $meta = storage_load_meta();
+} catch (Throwable $e) {
 }
-
-header('Content-Type: text/html; charset=utf-8');
+$loadedAt = $meta['loaded_at'] ?? null;
+$counts = $meta['counts'] ?? [];
+$today = date('Y-m-d');
+$monthStart = date('Y-m-01');
 ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></title>
-    <style>
-        body { font-family: Segoe UI, Arial, sans-serif; max-width: 720px; margin: 40px auto; line-height: 1.5; color: #222; }
-        h1 { font-size: 1.6rem; }
-        code, pre { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; }
-        pre { padding: 12px; overflow-x: auto; }
-        ol li { margin-bottom: 8px; }
-    </style>
+    <title><?= htmlspecialchars($title) ?></title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/php-app.css">
 </head>
 <body>
-    <h1><?= htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h1>
-    <p>Сервис Dash сейчас не запущен на порту <code><?= (int) $port ?></code>.</p>
+<div class="app-container">
+    <aside class="sidebar">
+        <h1 class="sidebar-title"><?= htmlspecialchars($title) ?></h1>
+        <nav class="sidebar-nav" id="main-nav">
+            <button type="button" class="nav-tab active" data-tab="overview">Обзор</button>
+            <button type="button" class="nav-tab" data-tab="agents">Агенты и команды</button>
+            <button type="button" class="nav-tab" data-tab="insights">Советы руководителю</button>
+            <button type="button" class="nav-tab" data-tab="structure">Структура продаж</button>
+            <button type="button" class="nav-tab" data-tab="funnel-unified">Воронка Общая</button>
+            <button type="button" class="nav-tab" data-tab="funnel-1c">Воронка 1С</button>
+            <button type="button" class="nav-tab" data-tab="funnel-bitrix">Воронка Битрикс</button>
+            <button type="button" class="nav-tab" data-tab="details">Детализация</button>
+        </nav>
+        <div class="sidebar-footer">
+            <div id="status-banner" class="status-banner <?= $loadedAt ? 'status-ok' : 'status-empty' ?>">
+                <?php if ($loadedAt): ?>
+                    <div>Загрузка: <?= htmlspecialchars(date('d.m.Y H:i', strtotime($loadedAt) ?: time())) ?></div>
+                    <div>
+                        1С: <?= (int) ($counts['operations_1c'] ?? 0) ?> ·
+                        Битрикс: <?= (int) ($counts['deals_bitrix'] ?? 0) ?> ·
+                        Unified: <?= (int) ($counts['sales_unified'] ?? 0) ?>
+                    </div>
+                <?php else: ?>
+                    <strong>Данные не загружены</strong><br>
+                    <span>Положите xlsx в input/ и нажмите «Обновить данные»</span>
+                <?php endif; ?>
+            </div>
+            <div class="sidebar-actions">
+                <button type="button" id="btn-refresh-data" class="btn-secondary">Обновить данные</button>
+            </div>
+            <div class="sidebar-footer-links" id="sidebar-footer-links">
+                <a href="install/check.php">Проверка сервера</a>
+                <button type="button" class="btn-settings-icon" data-tab="settings" title="Настройки">⚙</button>
+            </div>
+        </div>
+    </aside>
 
-    <h2>Как запустить</h2>
-    <ol>
-        <li>Поместите выгрузки <code>1C.xlsx</code> и <code>Битрикс.xlsx</code> в папку <code>input/</code>.</li>
-        <li>Активируйте виртуальное окружение Python и установите зависимости:
-            <pre>python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt</pre>
-        </li>
-        <li>Запустите загрузку данных:
-            <pre>python -m parser.pipeline</pre>
-        </li>
-        <li>Запустите дашборд:
-            <pre>python -m app.main</pre>
-        </li>
-        <li>Откройте в браузере <a href="<?= htmlspecialchars($dashUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"><?= htmlspecialchars($dashUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></a> или обновите эту страницу — произойдёт автоматический переход.</li>
-    </ol>
+    <div class="main-content">
+        <div id="filters-panel" class="filters-panel">
+            <h3 class="filters-title">Фильтры</h3>
+            <div class="filters-grid filters-grid-main">
+                <div class="filter-field filter-period">
+                    <label class="filter-label">Период</label>
+                    <div class="filter-period-row">
+                        <select id="filter-period-preset" class="filter-control filter-period-preset" title="Быстрый период">
+                            <option value="">Произвольный</option>
+                            <option value="day">День</option>
+                            <option value="week">Неделя</option>
+                            <option value="month" selected>Месяц</option>
+                            <option value="year">Год</option>
+                        </select>
+                        <input type="text" id="filter-date-from" class="filter-control filter-date-text" placeholder="ДД/ММ/ГГГГ" inputmode="numeric" autocomplete="off" data-iso="<?= $monthStart ?>">
+                        <span class="filter-period-sep">—</span>
+                        <input type="text" id="filter-date-to" class="filter-control filter-date-text" placeholder="ДД/ММ/ГГГГ" inputmode="numeric" autocomplete="off" data-iso="<?= $today ?>">
+                    </div>
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label">Источник</label>
+                    <select id="filter-source" class="filter-control">
+                        <option value="all">Все</option>
+                        <option value="1c">1С</option>
+                        <option value="bitrix">Битрикс</option>
+                    </select>
+                </div>
+                <div class="filter-field" id="filter-team-wrap"></div>
+                <div class="filter-field" id="filter-agent-wrap"></div>
+            </div>
+            <details class="filters-advanced">
+                <summary class="filters-advanced-title">Дополнительно</summary>
+                <div class="filters-grid filters-grid-advanced">
+                    <div class="filter-field filter-flags">
+                        <label class="filter-label">Агенты</label>
+                        <div class="filter-pills">
+                            <label class="filter-pill"><input type="checkbox" id="filter-inactive"><span>Неактивные</span></label>
+                            <label class="filter-pill"><input type="checkbox" id="filter-unknown"><span>Не в справочнике</span></label>
+                        </div>
+                    </div>
+                    <div class="filter-field" id="filter-category-wrap"></div>
+                    <div class="filter-field" id="filter-channel-wrap"></div>
+                    <div class="filter-field" id="filter-card-type-wrap"></div>
+                    <div class="filter-field" id="filter-client-type-wrap"></div>
+                    <div class="filter-field" id="filter-request-type-wrap"></div>
+                    <div class="filter-field" id="filter-client-wrap"></div>
+                    <div class="filter-field" id="filter-partner-wrap"></div>
+                </div>
+            </details>
+            <div class="filters-actions">
+                <button type="button" id="btn-apply-filters" class="btn-primary">Применить фильтры</button>
+            </div>
+        </div>
 
-    <h2>Настройки</h2>
-    <p>Справочник агентов и параметры метрик задаются в <code>settings.json</code> (ключ <code>agents</code>). Excel-справочник не используется.</p>
-    <p>После правки <code>agents</code> выполните <code>python -m parser.pipeline</code> или нажмите «Обновить данные» в дашборде.</p>
-    <p>Спецификация полей выгрузок: <code>format_spec.txt</code>.</p>
+        <div id="kpi-container" class="kpi-container">
+            <div class="kpi-card"><div class="kpi-title">Продажи</div><div class="kpi-value" id="kpi-sales">—</div><div class="kpi-sub" id="kpi-sub-sales">1С + Битрикс</div></div>
+            <div class="kpi-card"><div class="kpi-title">Прибыль без НДС</div><div class="kpi-value" id="kpi-profit">—</div><div class="kpi-sub" id="kpi-sub-profit">profit_ex_vat</div></div>
+            <div class="kpi-card"><div class="kpi-title">Маржа</div><div class="kpi-value" id="kpi-margin">—</div><div class="kpi-sub" id="kpi-sub-margin">прибыль / продажи</div></div>
+            <div class="kpi-card"><div class="kpi-title">Сделки</div><div class="kpi-value" id="kpi-deals">—</div><div class="kpi-sub" id="kpi-sub-deals">1С и Битрикс</div></div>
+            <div class="kpi-card" id="kpi-extra-card"><div class="kpi-title" id="kpi-extra-title">Доля 1С / Битрикс</div><div class="kpi-value" id="kpi-extra-value">—</div><div class="kpi-sub" id="kpi-extra-sub">по сумме продаж</div></div>
+            <div class="kpi-card"><div class="kpi-title">Средний чек</div><div class="kpi-value" id="kpi-avg-check">—</div><div class="kpi-sub" id="kpi-sub-avg-check">продажи / кол-во</div></div>
+        </div>
 
-    <p><small>Работа в закрытой сети, без авторизации. Доступ по LAN на хосте сервера.</small></p>
+        <div id="tab-content" class="tab-panel">
+            <p class="tab-note">Загрузка…</p>
+        </div>
+        <div id="app-message" class="debug-panel"></div>
+    </div>
+</div>
+
+<script src="assets/js/charts_simple.js"></script>
+<script src="assets/js/multi_select.js"></script>
+<script src="assets/js/settings_editor.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/tab_overview.js"></script>
+<script src="assets/js/tab_agents.js"></script>
+<script src="assets/js/tab_insights.js"></script>
+<script src="assets/js/tab_structure.js"></script>
+<script src="assets/js/tab_funnel_unified.js"></script>
+<script src="assets/js/tab_funnel_1c.js"></script>
+<script src="assets/js/tab_funnel_bitrix.js"></script>
+<script src="assets/js/tab_details.js"></script>
+<script src="assets/js/tab_settings.js"></script>
 </body>
 </html>
