@@ -1,0 +1,1569 @@
+{
+  "app": {
+    "title": "Дашборд продаж РС ТЛС",
+    "host": "0.0.0.0",
+    "port": 8050,
+    "dash_url": "http://127.0.0.1:8050"
+  },
+  "paths": {
+    "input_dir": "input",
+    "file_1c": "1C.xlsx",
+    "file_bitrix": "Битрикс.xlsx",
+    "sqlite": "data/dashboard.db",
+    "last_load_meta": "data/last_load.json"
+  },
+  "sheets": {
+    "1c": "TDSheet",
+    "bitrix": "Битрикс"
+  },
+  "metrics": {
+    "profit_field": "profit_ex_vat",
+    "bitrix_success_value": "Успех",
+    "bitrix_date_field": "client_paid_at",
+    "bitrix_date_fallback": "deal_created_at",
+    "one_c_date_field": "date_operation"
+  },
+  "defaults": {
+    "period": "month_to_date",
+    "show_inactive_agents": false,
+    "source": "all"
+  },
+  "department_map": {
+    "Centurion": "Центурион",
+    "Universal": "Юниверсал",
+    "Universal Night": "Ночники",
+    "RM": "РМ",
+    "Lifestyle": "Лайфстайл",
+    "Corporate": "Корп",
+    "Centurion/РТ": "РТ",
+    "Admins": "Администраторы",
+    "VISA": "Виза",
+    "АВИА": "АВИА",
+    "Other": "Прочее"
+  },
+  "agents": [
+    {
+      "agent_key": "ledenev_semen",
+      "name_display": "Леденев Семен",
+      "names_1c": [
+        "Semen Ledenev"
+      ],
+      "names_bitrix": [
+        "Леденев Семен"
+      ],
+      "team": "Universal Night",
+      "is_active": false
+    },
+    {
+      "agent_key": "peresh_marina",
+      "name_display": "Переш Марина",
+      "names_1c": [
+        "Marina Peresh"
+      ],
+      "names_bitrix": [
+        "Переш Марина"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "osipova_anna",
+      "name_display": "Осипова Анна",
+      "names_1c": [
+        "Anna Osipova"
+      ],
+      "names_bitrix": [
+        "Осипова Анна",
+        "Осипова А. Р."
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "lebedinskaya_irina",
+      "name_display": "Лебединская Ирина",
+      "names_1c": [
+        "Irina Lebedinskaya"
+      ],
+      "names_bitrix": [
+        "Лебединская Ирина"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "gumerova_zulfiya",
+      "name_display": "Гумерова Зульфия",
+      "names_1c": [
+        "Zulfiya Gumerova"
+      ],
+      "names_bitrix": [
+        "Гумерова Зульфия"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "karlinskaya_anastasia",
+      "name_display": "Карлинская Анастасия",
+      "names_1c": [
+        "Anastasia Karlinskaya"
+      ],
+      "names_bitrix": [
+        "Карлинская Анастасия",
+        "Карлинская А. В."
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "kislova_antonina",
+      "name_display": "Кислова Антонина",
+      "names_1c": [
+        "Antonina Kislova"
+      ],
+      "names_bitrix": [
+        "Кислова Антонина"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "nurzhinskaya_daria",
+      "name_display": "Нуржинская Дарья",
+      "names_1c": [
+        "Daria Nurzhinskaya"
+      ],
+      "names_bitrix": [
+        "Нуржинская Дарья"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "kolosova_anna",
+      "name_display": "Колосова Анна",
+      "names_1c": [
+        "Anna Kolosova"
+      ],
+      "names_bitrix": [
+        "Колосова Анна"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "kuchinskaya_marina",
+      "name_display": "Кучинская Марина",
+      "names_1c": [
+        "Marina Kuchinskaya"
+      ],
+      "names_bitrix": [
+        "Кучинская Марина",
+        "Кучинская М. А."
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "butkov_daniil",
+      "name_display": "Бутков Даниил",
+      "names_1c": [],
+      "names_bitrix": [
+        "Бутков Даниил"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "pimenova_snezhana",
+      "name_display": "Пименова Снежана",
+      "names_1c": [
+        "Snezhana Pimenova"
+      ],
+      "names_bitrix": [
+        "Пименова Снежана"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "skolzneva_ekaterina",
+      "name_display": "Скользнева Екатерина",
+      "names_1c": [
+        "Ekaterina Skolzneva"
+      ],
+      "names_bitrix": [
+        "Скользнева Екатерина"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "avanesyan_veronika",
+      "name_display": "Аванесян Вероника",
+      "names_1c": [
+        "Veronika Avanesyan"
+      ],
+      "names_bitrix": [
+        "Аванесян Вероника",
+        "Аванесян В. А."
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "gorelikova_yulia",
+      "name_display": "Гореликова Юлия",
+      "names_1c": [
+        "Yulia Gorelikova"
+      ],
+      "names_bitrix": [
+        "Гореликова Юлия"
+      ],
+      "team": "Universal Night",
+      "is_active": false
+    },
+    {
+      "agent_key": "saenko_evgeniya",
+      "name_display": "Саенко Евгения",
+      "names_1c": [
+        "Evgeniya Saenko"
+      ],
+      "names_bitrix": [
+        "Саенко Евгения"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "vaysbuh_elizaveta",
+      "name_display": "Вайсбух Елизавета",
+      "names_1c": [
+        "Elizaveta Vaysbuh"
+      ],
+      "names_bitrix": [
+        "Вайсбух Елизавета"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "bagina_maria",
+      "name_display": "Багина Мария",
+      "names_1c": [
+        "Maria Bagina",
+        "Maria Bagina_Центурион"
+      ],
+      "names_bitrix": [
+        "Багина Мария",
+        "Багина М. А."
+      ],
+      "team": "Balchug",
+      "is_active": false
+    },
+    {
+      "agent_key": "shabarov_vsevolod",
+      "name_display": "Шабаров Всеволод",
+      "names_1c": [
+        "Vsevolod Shabarov"
+      ],
+      "names_bitrix": [
+        "Шабаров Всеволод"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "vansovich_anastasia",
+      "name_display": "Вансович Анастасия",
+      "names_1c": [
+        "Anastasia Vansovich"
+      ],
+      "names_bitrix": [
+        "Вансович Анастасия"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "usova_svetlana",
+      "name_display": "Усова Светлана",
+      "names_1c": [
+        "Svetlana Usova"
+      ],
+      "names_bitrix": [
+        "Усова Светлана"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "kalinchikova_tatiana",
+      "name_display": "Калинчикова Татьяна",
+      "names_1c": [
+        "Tatiana Kalinchikova"
+      ],
+      "names_bitrix": [
+        "Калинчикова Татьяна"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "rulina_nadezhda",
+      "name_display": "Рулина Надежда",
+      "names_1c": [
+        "Nadezhda Rulina"
+      ],
+      "names_bitrix": [
+        "Рулина Надежда"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "morozova_anna",
+      "name_display": "Морозова Анна",
+      "names_1c": [
+        "Anna Morozova"
+      ],
+      "names_bitrix": [
+        "Морозова Анна"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "silivanova_polina",
+      "name_display": "Силиванова Полина",
+      "names_1c": [
+        "Polina Silivanova"
+      ],
+      "names_bitrix": [
+        "Силиванова Полина"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "obraztsova_evgenia",
+      "name_display": "Образцова Евгения",
+      "names_1c": [
+        "Evgenia Obraztsova"
+      ],
+      "names_bitrix": [
+        "Образцова Евгения",
+        "Образцова Е. В."
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "blishchenko_arina",
+      "name_display": "Блищенко Арина",
+      "names_1c": [
+        "Arina Blishchenko"
+      ],
+      "names_bitrix": [
+        "Блищенко Арина"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "melnichenko_vladislav",
+      "name_display": "Мельниченко Владислав",
+      "names_1c": [
+        "Vladislav Melnichenko"
+      ],
+      "names_bitrix": [
+        "Мельниченко Владислав"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "kiseleva_ksenia",
+      "name_display": "Киселева Ксения",
+      "names_1c": [
+        "Ksenia Kiseleva"
+      ],
+      "names_bitrix": [
+        "Киселева Ксения"
+      ],
+      "team": "Universal",
+      "is_active": false
+    },
+    {
+      "agent_key": "petrov_ivan",
+      "name_display": "Петров Иван",
+      "names_1c": [
+        "Ivan Petrov"
+      ],
+      "names_bitrix": [
+        "Петров Иван"
+      ],
+      "team": "Centurion",
+      "is_active": false
+    },
+    {
+      "agent_key": "tyan_tatyana",
+      "name_display": "Тян Татьяна",
+      "names_1c": [
+        "Tatyana Tyan"
+      ],
+      "names_bitrix": [
+        "Татьяна Тян",
+        "Тян Татьяна"
+      ],
+      "team": "Corporate",
+      "is_active": false
+    },
+    {
+      "agent_key": "gaydamakha_anastasiya",
+      "name_display": "Гайдамаха Анастасия",
+      "names_1c": [
+        "Anastasiya Gaydamakha"
+      ],
+      "names_bitrix": [
+        "Гайдамаха Анастасия"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "rudyashko_alisa",
+      "name_display": "Рудяшко Алиса",
+      "names_1c": [
+        "Alisa Rudyashko"
+      ],
+      "names_bitrix": [
+        "Рудяшко Алиса"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "nakhodnova_daria",
+      "name_display": "Находнова Дарья",
+      "names_1c": [
+        "Daria Nakhodnova"
+      ],
+      "names_bitrix": [
+        "Находнова Дарья"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "moiseenko_sofia",
+      "name_display": "Моисеенко Софья",
+      "names_1c": [
+        "Sofia Moiseenko"
+      ],
+      "names_bitrix": [
+        "Софья Моисеенко",
+        "Моисеенко Софья"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "kastner_ekaterina",
+      "name_display": "Кастнер Екатерина",
+      "names_1c": [
+        "Ekaterina Kastner"
+      ],
+      "names_bitrix": [
+        "Кастнер Екатерина"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "kazakova_viktoria",
+      "name_display": "Казакова Виктория",
+      "names_1c": [
+        "Viktoria Kazakova"
+      ],
+      "names_bitrix": [
+        "Казакова Виктория"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "muradyan_sona",
+      "name_display": "Мурадян Сона",
+      "names_1c": [
+        "Sona Muradyan"
+      ],
+      "names_bitrix": [
+        "Мурадян Сона"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "bulgakova_elizaveta",
+      "name_display": "Булгакова Елизавета",
+      "names_1c": [
+        "Elizaveta Bulgakova"
+      ],
+      "names_bitrix": [
+        "Булгакова Елизавета"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "oskanova_maria",
+      "name_display": "Осканова Мария",
+      "names_1c": [
+        "Maria Oskanova"
+      ],
+      "names_bitrix": [
+        "Осканова Мария"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "tarkhova_daria",
+      "name_display": "Тархова Дарья",
+      "names_1c": [
+        "Daria Tarkhova"
+      ],
+      "names_bitrix": [
+        "Тархова Дарья"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "tsydenova_yanzhima",
+      "name_display": "Цыденова Янжима",
+      "names_1c": [
+        "Yanzhima Tsydenova"
+      ],
+      "names_bitrix": [
+        "Цыденова Янжима"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "grigorieva_maria",
+      "name_display": "Григорьева Мария",
+      "names_1c": [
+        "Maria Grigorieva"
+      ],
+      "names_bitrix": [
+        "Григорьева Мария"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "pudovkina_tatiana",
+      "name_display": "Пудовкина Татьяна",
+      "names_1c": [
+        "Tatiana Pudovkina"
+      ],
+      "names_bitrix": [
+        "Пудовкина Татьяна",
+        "Пудовкина Т. Г."
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "abbasova_elnara",
+      "name_display": "Аббасова Эльнара",
+      "names_1c": [
+        "Elnara Abbasova"
+      ],
+      "names_bitrix": [
+        "Аббасова Эльнара"
+      ],
+      "team": "Universal Night",
+      "is_active": true
+    },
+    {
+      "agent_key": "mashkova_anastasiya",
+      "name_display": "Машкова Анастасия",
+      "names_1c": [
+        "Anastasiya Mashkova"
+      ],
+      "names_bitrix": [
+        "Машкова Анастасия"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "vostrikova_darya",
+      "name_display": "Вострикова Дарья",
+      "names_1c": [
+        "Darya Vostrikova"
+      ],
+      "names_bitrix": [
+        "Вострикова Дарья"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "strakhova_darya",
+      "name_display": "Страхова Дарья",
+      "names_1c": [
+        "Darya Strakhova"
+      ],
+      "names_bitrix": [
+        "Страхова Дарья"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "cherkalova_daria",
+      "name_display": "Черкалова Дарья",
+      "names_1c": [
+        "Daria Cherkalova"
+      ],
+      "names_bitrix": [
+        "Черкалова Дарья"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "berezkin_ilya",
+      "name_display": "Березкин Илья",
+      "names_1c": [],
+      "names_bitrix": [
+        "Березкин Илья"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "nedochetova_maria",
+      "name_display": "Недочетова Мария",
+      "names_1c": [],
+      "names_bitrix": [
+        "Недочетова Мария"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "batishcheva_elena",
+      "name_display": "Батищева Елена",
+      "names_1c": [
+        "Elena Batishcheva"
+      ],
+      "names_bitrix": [
+        "Батищева Елена"
+      ],
+      "team": "ДРБ",
+      "is_active": true
+    },
+    {
+      "agent_key": "tiurenkova_daria",
+      "name_display": "Тюренкова Дарья",
+      "names_1c": [
+        "Daria Tiurenkova",
+        "Daria Tuyrenkova"
+      ],
+      "names_bitrix": [
+        "Тюренкова Дарья",
+        "Тюренкова Д. А."
+      ],
+      "team": "Director of Sales",
+      "is_active": true
+    },
+    {
+      "agent_key": "lekareva_anastasiya",
+      "name_display": "Лекарева Анастасия",
+      "names_1c": [
+        "Anastasiya Lekareva"
+      ],
+      "names_bitrix": [
+        "Лекарева Анастасия"
+      ],
+      "team": "Marketing",
+      "is_active": true
+    },
+    {
+      "agent_key": "demidova_ekaterina",
+      "name_display": "Демидова Екатерина",
+      "names_1c": [
+        "Ekaterina Demidova"
+      ],
+      "names_bitrix": [
+        "Демидова Екатерина"
+      ],
+      "team": "Marketing",
+      "is_active": true
+    },
+    {
+      "agent_key": "emelina_asya",
+      "name_display": "Емелина Ася",
+      "names_1c": [
+        "Asya Emelina"
+      ],
+      "names_bitrix": [
+        "Емелина Ася"
+      ],
+      "team": "Marketing",
+      "is_active": true
+    },
+    {
+      "agent_key": "kukla_maria",
+      "name_display": "Кукла Мария",
+      "names_1c": [
+        "Maria Kukla"
+      ],
+      "names_bitrix": [
+        "Кукла Мария"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "rogacheva_alisa",
+      "name_display": "Рогачева Алиса",
+      "names_1c": [
+        "Alisa Rogacheva"
+      ],
+      "names_bitrix": [
+        "Рогачева Алиса"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "kudryavtseva_alexandra",
+      "name_display": "Кудрявцева Александра",
+      "names_1c": [
+        "Alexandra Kudryavtseva"
+      ],
+      "names_bitrix": [
+        "Кудрявцева Александра"
+      ],
+      "team": "Lifestyle",
+      "is_active": false
+    },
+    {
+      "agent_key": "polovodova_aleksandra",
+      "name_display": "Половодова Александра",
+      "names_1c": [
+        "Aleksandra Polovodova"
+      ],
+      "names_bitrix": [
+        "Половодова Александра"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "terehova_nadezhda",
+      "name_display": "Терехова Надежда",
+      "names_1c": [
+        "Nadezhda Terehova",
+        "Nadezhda Terekhova"
+      ],
+      "names_bitrix": [
+        "Терехова Надежда",
+        "Терехова Н. В."
+      ],
+      "team": "RM",
+      "is_active": false
+    },
+    {
+      "agent_key": "frizina_elizaveta",
+      "name_display": "Фризина Елизавета",
+      "names_1c": [
+        "Elizaveta Frizina"
+      ],
+      "names_bitrix": [
+        "Фризина Елизавета"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "raevskaya_aleksandra",
+      "name_display": "Раевская Александра",
+      "names_1c": [
+        "Aleksandra Raevskaya"
+      ],
+      "names_bitrix": [
+        "Раевская Александра"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "bulgakov_maksim",
+      "name_display": "Булгаков Максим",
+      "names_1c": [
+        "Maksim Bulgakov"
+      ],
+      "names_bitrix": [
+        "Булгаков Максим",
+        "Булгаков М. О."
+      ],
+      "team": "VISA",
+      "is_active": true
+    },
+    {
+      "agent_key": "lazareva_irina",
+      "name_display": "Лазарева Ирина",
+      "names_1c": [
+        "Irina Lazareva"
+      ],
+      "names_bitrix": [
+        "Лазарева Ирина",
+        "Лазарева И. А."
+      ],
+      "team": "Admins",
+      "is_active": true
+    },
+    {
+      "agent_key": "yashchenko_konstantin",
+      "name_display": "Ященко Константин",
+      "names_1c": [
+        "Konstantin Yashchenko",
+        "Konstantin Yaschenko"
+      ],
+      "names_bitrix": [
+        "Ященко Константин",
+        "Ященко К. Л."
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "fedotova_elena",
+      "name_display": "Федотова Елена",
+      "names_1c": [
+        "Elena Fedotova"
+      ],
+      "names_bitrix": [
+        "Федотова Елена",
+        "Федотова Е. П."
+      ],
+      "team": "Admins",
+      "is_active": true
+    },
+    {
+      "agent_key": "mulendeev_andrey",
+      "name_display": "Мулендеев Андрей",
+      "names_1c": [
+        "Andrey Mulendeev"
+      ],
+      "names_bitrix": [
+        "Мулендеев Андрей",
+        "Мулендеев Андрей Александрович",
+        "Мулендеев А. А."
+      ],
+      "team": "Admins",
+      "is_active": true
+    },
+    {
+      "agent_key": "kuritsyn_denis",
+      "name_display": "Курицын Денис",
+      "names_1c": [
+        "Denis Kuritsyn"
+      ],
+      "names_bitrix": [
+        "Курицын Денис",
+        "Курицын Денис Станиславович",
+        "Курицын Агент"
+      ],
+      "team": "Admins",
+      "is_active": true
+    },
+    {
+      "agent_key": "vetvitskaya_elena",
+      "name_display": "Ветвицкая Елена",
+      "names_1c": [
+        "Elena Vetvitskaya"
+      ],
+      "names_bitrix": [
+        "Ветвицкая Елена",
+        "Ветвицкая Е. Н."
+      ],
+      "team": "Corporate",
+      "is_active": true
+    },
+    {
+      "agent_key": "minibaeva_dina",
+      "name_display": "Минибаева Дина",
+      "names_1c": [
+        "Dina Minibaeva"
+      ],
+      "names_bitrix": [
+        "Минибаева Дина"
+      ],
+      "team": "Corporate",
+      "is_active": true
+    },
+    {
+      "agent_key": "pankin_alexey",
+      "name_display": "Панкин Алексей",
+      "names_1c": [
+        "Alexey Pankin"
+      ],
+      "names_bitrix": [
+        "Панкин Алексей",
+        "Панкин А. А."
+      ],
+      "team": "Corporate",
+      "is_active": true
+    },
+    {
+      "agent_key": "ritstso_alina",
+      "name_display": "Риццо Алина",
+      "names_1c": [
+        "Alina Ritstso"
+      ],
+      "names_bitrix": [
+        "Риццо Алина"
+      ],
+      "team": "Restorant",
+      "is_active": true
+    },
+    {
+      "agent_key": "rudik_olga",
+      "name_display": "Рудик Ольга",
+      "names_1c": [],
+      "names_bitrix": [
+        "Рудик Ольга"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "kosachevskaya_svetlana",
+      "name_display": "Косачевская Светлана",
+      "names_1c": [
+        "Svetlana Kosachevskaya"
+      ],
+      "names_bitrix": [
+        "Косачевская Светлана",
+        "Косачевская светлана"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "abdrazakova_gulsana",
+      "name_display": "Абдразакова Гульсана",
+      "names_1c": [],
+      "names_bitrix": [
+        "Гульсана Абдразакова",
+        "Абдразакова Гульсана"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "molochnikova_daria",
+      "name_display": "Молочникова Дарья",
+      "names_1c": [],
+      "names_bitrix": [
+        "Молочникова Дарья"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "shiryaeva_anna",
+      "name_display": "Ширяева Анна",
+      "names_1c": [],
+      "names_bitrix": [
+        "Ширяева Анна"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "denisov_roman",
+      "name_display": "Денисов Роман",
+      "names_1c": [],
+      "names_bitrix": [
+        "Денисов Роман"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "dmitrieva_inna",
+      "name_display": "Дмитриева Инна",
+      "names_1c": [
+        "Inna Dmitrieva"
+      ],
+      "names_bitrix": [
+        "Дмитриева Инна"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "ulitin_evgeniy",
+      "name_display": "Улитин Евгений",
+      "names_1c": [],
+      "names_bitrix": [
+        "Улитин Евгений"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "zharkikh_dinara",
+      "name_display": "Жарких Динара",
+      "names_1c": [],
+      "names_bitrix": [
+        "Жарких Динара Маратовна",
+        "Жарких Динара"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "musina_yulia",
+      "name_display": "Мусина Юлия",
+      "names_1c": [],
+      "names_bitrix": [
+        "Мусина Юлия Наиловна",
+        "Мусина Юлия"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "ustyuzhanina_irina",
+      "name_display": "Устюжанина Ирина",
+      "names_1c": [],
+      "names_bitrix": [
+        "Устюжанина Ирина Геннадьевна",
+        "Устюжанина Ирина"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "zubareva_ekaterina",
+      "name_display": "Зубарева Екатерина",
+      "names_1c": [],
+      "names_bitrix": [
+        "Зубарева Екатерина Владимировна",
+        "Зубарева Екатерина"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "skarzhinskiy_mikhail",
+      "name_display": "Скаржинский Михаил",
+      "names_1c": [],
+      "names_bitrix": [
+        "Скаржинский Михаил"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "sheludchenko_olga",
+      "name_display": "Шелудченко Ольга",
+      "names_1c": [],
+      "names_bitrix": [
+        "Шелудченко Ольга"
+      ],
+      "team": "Other (БРС)",
+      "is_active": true
+    },
+    {
+      "agent_key": "dobryyan_evgeniya",
+      "name_display": "Добрыян Евгения",
+      "names_1c": [],
+      "names_bitrix": [
+        "Добрыян Евгения"
+      ],
+      "team": "Other",
+      "is_active": true
+    },
+    {
+      "agent_key": "shishkina_elena",
+      "name_display": "Шишкина Елена",
+      "names_1c": [
+        "Elena Shishkina"
+      ],
+      "names_bitrix": [
+        "Шишкина Елена"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "dorofeeva_anna",
+      "name_display": "Дорофеева Анна",
+      "names_1c": [
+        "Anna Dorofeeva"
+      ],
+      "names_bitrix": [
+        "Дорофеева Анна"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "trishina_tatyana",
+      "name_display": "Тришина Татьяна",
+      "names_1c": [
+        "Tatyana Trishina"
+      ],
+      "names_bitrix": [
+        "Тришина Татьяна"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "prokopyeva_larisa",
+      "name_display": "Прокопьева Лариса",
+      "names_1c": [
+        "Larisa Prokopyeva"
+      ],
+      "names_bitrix": [
+        "Лариса Прокопьева",
+        "Прокопьева Лариса"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "nikiforova_olga",
+      "name_display": "Никифорова Ольга",
+      "names_1c": [
+        "Olga Nikiforova"
+      ],
+      "names_bitrix": [
+        "Ольга Никифорова",
+        "Никифорова Ольга"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "angazhi_anastasia",
+      "name_display": "Ангажи Анастасия",
+      "names_1c": [
+        "Anastasia Angazhi"
+      ],
+      "names_bitrix": [
+        "Ангажи Анастасия"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "shirkunova_ekaterina",
+      "name_display": "Ширкунова Екатерина",
+      "names_1c": [
+        "Ekaterina Shirkunova"
+      ],
+      "names_bitrix": [
+        "Ширкунова Екатерина"
+      ],
+      "team": "АВИА",
+      "is_active": true
+    },
+    {
+      "agent_key": "bakhoreva_lyudmila",
+      "name_display": "Бахорева Людмила",
+      "names_1c": [
+        "Lyudmila Bakhoreva"
+      ],
+      "names_bitrix": [
+        "Людмила Бахорева",
+        "Бахорева Людмила"
+      ],
+      "team": "Гл. Бухгалтер (сделки без участия опер зала)",
+      "is_active": true
+    },
+    {
+      "agent_key": "scherbakova_maria",
+      "name_display": "Щербакова Мария",
+      "names_1c": [
+        "Maria Scherbakova"
+      ],
+      "names_bitrix": [
+        "Щербакова Мария",
+        "Щербакова М. С."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "surikova_ekaterina",
+      "name_display": "Сурикова Екатерина",
+      "names_1c": [],
+      "names_bitrix": [
+        "Сурикова Екатерина",
+        "Сурикова Е. В."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "shonokhova_ekaterina",
+      "name_display": "Шонохова Екатерина",
+      "names_1c": [
+        "Ekaterina Shonokhova"
+      ],
+      "names_bitrix": [
+        "Шонохова Екатерина",
+        "Шонохова Е. В."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "vrublevskaya_kristina",
+      "name_display": "Врублевская Кристина",
+      "names_1c": [
+        "Kristina Vrublevskaya"
+      ],
+      "names_bitrix": [
+        "Врублевская Кристина",
+        "Врублевская К. С."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "demidova_elena",
+      "name_display": "Демидова Елена",
+      "names_1c": [
+        "Elena Demidova"
+      ],
+      "names_bitrix": [
+        "Демидова Елена",
+        "Демидова Е. Н.",
+        "Демидова Елена Николаевна"
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "efremova_daria",
+      "name_display": "Ефремова Дарья",
+      "names_1c": [
+        "Daria Efremova"
+      ],
+      "names_bitrix": [
+        "Ефремова Дарья",
+        "Ефремова Д. А."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "isaykina_olga",
+      "name_display": "Исайкина Ольга",
+      "names_1c": [
+        "Olga Isaykina",
+        "Olga Karandaeva"
+      ],
+      "names_bitrix": [
+        "Исайкина Ольга",
+        "Карандаева Оля",
+        "Исайкина О. В.",
+        "Карандаева О. В."
+      ],
+      "team": "RM",
+      "is_active": true
+    },
+    {
+      "agent_key": "abramova_elena",
+      "name_display": "Абрамова Елена",
+      "names_1c": [
+        "Elena Abramova"
+      ],
+      "names_bitrix": [
+        "Абрамова Елена"
+      ],
+      "team": "RM",
+      "is_active": false
+    },
+    {
+      "agent_key": "tsiopich_irina",
+      "name_display": "Циопич Ирина",
+      "names_1c": [
+        "Irina Tsiopich"
+      ],
+      "names_bitrix": [
+        "Циопич Ирина",
+        "Циопич И. А."
+      ],
+      "team": "Centurion/РТ",
+      "is_active": true
+    },
+    {
+      "agent_key": "zolotareva_elizaveta",
+      "name_display": "Золотарёва Елизавета",
+      "names_1c": [
+        "Elizaveta Zolotareva"
+      ],
+      "names_bitrix": [
+        "Золотарёва Елизавета",
+        "Золотарева Елизавета"
+      ],
+      "team": "Centurion/РТ",
+      "is_active": true
+    },
+    {
+      "agent_key": "pakulyeva_ekaterina",
+      "name_display": "Пакульева Екатерина",
+      "names_1c": [
+        "Ekaterina Pakulyeva"
+      ],
+      "names_bitrix": [
+        "Пакульева Екатерина"
+      ],
+      "team": "Centurion/РТ",
+      "is_active": true
+    },
+    {
+      "agent_key": "makarova_tatyana",
+      "name_display": "Макарова Татьяна",
+      "names_1c": [
+        "Tatyana Makarova",
+        "Tatyana Kudryavtseva"
+      ],
+      "names_bitrix": [
+        "Макарова Татьяна",
+        "Кудрявцева Татьяна",
+        "Кудрявцева Т. А."
+      ],
+      "team": "Centurion/РТ",
+      "is_active": true
+    },
+    {
+      "agent_key": "gomanova_elena",
+      "name_display": "Гоманова Елена",
+      "names_1c": [
+        "Elena Gomanova"
+      ],
+      "names_bitrix": [
+        "Гоманова Елена",
+        "Гоманова Е. М."
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "akhaladze_ella",
+      "name_display": "Ахаладзе Элла",
+      "names_1c": [
+        "Ella Akhaladze"
+      ],
+      "names_bitrix": [
+        "Ахаладзе Элла"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "spiridonova_ekaterina",
+      "name_display": "Спиридонова Екатерина",
+      "names_1c": [
+        "Ekaterina Spiridonova"
+      ],
+      "names_bitrix": [
+        "Спиридонова Екатерина"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "yakovleva_aleksandra",
+      "name_display": "Яковлева Александра",
+      "names_1c": [
+        "Aleksandra Yakovleva"
+      ],
+      "names_bitrix": [
+        "Яковлева Александра"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "ogurtsova_olga",
+      "name_display": "Огурцова Ольга",
+      "names_1c": [
+        "Olga Ogurtsova"
+      ],
+      "names_bitrix": [
+        "Огурцова Ольга"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "arkhipova_maria",
+      "name_display": "Архипова Мария",
+      "names_1c": [
+        "Maria Arkhipova"
+      ],
+      "names_bitrix": [
+        "Архипова Мария",
+        "Архипова М. А."
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "safiullina_elina",
+      "name_display": "Сафиуллина Элина",
+      "names_1c": [
+        "Elina Safiullina"
+      ],
+      "names_bitrix": [
+        "Сафиуллина Элина",
+        "Сафиуллина Элина Ильнуровна"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "bobkov_sergey",
+      "name_display": "Бобков Сергей",
+      "names_1c": [
+        "Sergey Bobkov"
+      ],
+      "names_bitrix": [
+        "Бобков Сергей"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "redkacheva_olga",
+      "name_display": "Редкачева Ольга",
+      "names_1c": [
+        "Olga Redkacheva"
+      ],
+      "names_bitrix": [
+        "Редкачева Ольга"
+      ],
+      "team": "Centurion",
+      "is_active": true
+    },
+    {
+      "agent_key": "susekov_ivan",
+      "name_display": "Сусеков Иван",
+      "names_1c": [
+        "Ivan Susekov"
+      ],
+      "names_bitrix": [
+        "Сусеков Иван"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "perekrestova_elizaveta",
+      "name_display": "Перекрестова Елизавета",
+      "names_1c": [
+        "Elizaveta Perekrestova"
+      ],
+      "names_bitrix": [
+        "Перекрестова Елизавета",
+        "Перекрёстова Е. Е.",
+        "Перекрестова Е. Е."
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "maksimova_ekaterina",
+      "name_display": "Максимова Екатерина",
+      "names_1c": [
+        "Ekaterina Maksimova"
+      ],
+      "names_bitrix": [
+        "Максимова Екатерина"
+      ],
+      "team": "Universal",
+      "is_active": true
+    },
+    {
+      "agent_key": "starostina_valentina",
+      "name_display": "Старостина Валентина",
+      "names_1c": [
+        "Valentina Starostina"
+      ],
+      "names_bitrix": [
+        "Старостина Валентина",
+        "Старостина В. Е."
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "andrade_diana",
+      "name_display": "Андраде Диана",
+      "names_1c": [
+        "Diana Andrade"
+      ],
+      "names_bitrix": [
+        "Андраде Диана",
+        "Андраде Андраде Д. Х."
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "karbi_klara",
+      "name_display": "Карби Клара",
+      "names_1c": [
+        "Klara Karbi"
+      ],
+      "names_bitrix": [
+        "Карби Клара"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "nazarova_sofya",
+      "name_display": "Назарова Софья",
+      "names_1c": [
+        "Sofya Nazarova"
+      ],
+      "names_bitrix": [
+        "Назарова Софья"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    },
+    {
+      "agent_key": "latkina_margarita",
+      "name_display": "Латкина Маргарита",
+      "names_1c": [
+        "Margarita Latkina"
+      ],
+      "names_bitrix": [
+        "Латкина Маргарита"
+      ],
+      "team": "Lifestyle",
+      "is_active": true
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Runtime / local data
+data/dashboard.db
+data/last_load.json
+data/backups/
+
+# Input exports (place locally, not in git)
+input/*.xlsx
+input/*.xls
+
+# Root Excel dumps
+*.xlsx
+*.xls
+
+# Debug logs
+debug*.log
+
+# Env secrets
+.env
+.env.*
