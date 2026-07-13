@@ -1193,7 +1193,7 @@
                 "Other (ТЛС)"
             ],
             "team": "Other (ТЛС)",
-            "is_active": true,
+            "is_active": false,
             "names_1c": [],
             "names_bitrix": [
                 "Гульсана Абдразакова",
@@ -1594,7 +1594,7 @@
                 "RM"
             ],
             "team": "RM",
-            "is_active": false,
+            "is_active": true,
             "names_1c": [
                 "Elena Abramova"
             ],
@@ -1626,7 +1626,7 @@
                 "All Travel"
             ],
             "team": "All Travel",
-            "is_active": true,
+            "is_active": false,
             "names_1c": [
                 "Elizaveta Zolotareva"
             ],
@@ -1766,9 +1766,9 @@
             "agent_key": "safiullina_elina",
             "name_display": "Сафиуллина Элина",
             "teams": [
-                "All Travel"
+                "RM"
             ],
-            "team": "All Travel",
+            "team": "RM",
             "is_active": true,
             "names_1c": [
                 "Elina Safiullina"
@@ -1800,7 +1800,7 @@
                 "All Travel"
             ],
             "team": "All Travel",
-            "is_active": true,
+            "is_active": false,
             "names_1c": [
                 "Olga Redkacheva"
             ],
@@ -1894,7 +1894,7 @@
                 "Lifestyle"
             ],
             "team": "Lifestyle",
-            "is_active": true,
+            "is_active": false,
             "names_1c": [
                 "Klara Karbi"
             ],
