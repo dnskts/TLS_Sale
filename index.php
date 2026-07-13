@@ -71,6 +71,7 @@ $monthStart = date('Y-m-01');
             </div>
             <div class="sidebar-footer-links" id="sidebar-footer-links">
                 <a href="install/check.php">Проверка сервера</a>
+                <a href="install/bench.php" title="Диагностика скорости (нужен token)">Анализ скорости</a>
                 <button type="button" class="btn-settings-icon" data-tab="settings" title="Настройки">⚙</button>
             </div>
         </div>

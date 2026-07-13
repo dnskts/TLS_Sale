@@ -20,6 +20,7 @@
 | Воронки | `api/funnel_*.php` + `assets/js/tab_funnel_*.js` |
 | Настройки | `api/settings.php` + `assets/js/tab_settings.js` |
 | Проверка сервера | `install/check.php` |
+| Анализ скорости (прод) | `install/bench.php?token=…` |
 
 Правило: **1 крупная фича = 1 файл** (или пара api + js). В файлах есть русские комментарии простым языком.
 
@@ -72,3 +73,5 @@
 Откройте `install/check.php` — обязательные пункты должны быть **OK**.  
 Убедитесь, что `data/` и `input/` доступны на запись.  
 Папки `data/` и `input/` закрыты от прямого скачивания через `.htaccess` (Apache).
+
+**Диагностика скорости:** `install/bench.php?token=XXXXXXXXXXXXXXXX` — замеры типичных API-сценариев. Token = первые 16 символов `settings_auth_token()` (тот же доступ, что у настроек admin). Без token страница вернёт 403.
