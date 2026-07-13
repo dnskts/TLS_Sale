@@ -243,7 +243,7 @@ function apply_operations_1c_filters_on_enriched(array $enriched, array $filters
                 'card_type' => $row['card_type'] ?? null,
                 'client' => $row['client'] ?? null,
                 'partner_or_supplier' => $row['supplier'] ?? null,
-                'client_type' => null,
+                'client_type' => $row['client_type'] ?? null,
                 'request_type' => null,
             ]],
             array_merge($filters, ['source' => 'all'])

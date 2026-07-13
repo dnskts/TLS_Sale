@@ -200,7 +200,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding: 25px;
+  padding: 16px 20px;
   box-sizing: border-box;
   min-width: 0;
 }
@@ -211,8 +211,8 @@ body {
   background-color: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: 6px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
+  padding: 8px 16px 8px;
+  margin-bottom: 10px;
   box-shadow: var(--shadow);
 }
 
@@ -228,7 +228,7 @@ body {
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 8px;
   align-items: end;
 }
 
@@ -242,6 +242,7 @@ body {
   font-size: 12px;
   color: var(--muted);
   font-weight: bold;
+  margin-bottom: 2px;
 }
 
 .filter-checks {
@@ -260,7 +261,7 @@ body {
   display: flex;
   gap: 10px;
   align-items: center;
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 /* ── Dash Dropdown ───────────────────────────────────── */
@@ -320,15 +321,15 @@ body {
 .kpi-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
+  gap: 10px;
+  margin: 0 0 12px;
 }
 
 .kpi-card {
   background-color: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: 6px;
-  padding: 15px 20px;
+  padding: 10px 14px;
   box-shadow: var(--shadow);
   border-top: 3px solid var(--primary);
 }
@@ -338,7 +339,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-weight: bold;
 }
 
@@ -348,10 +349,19 @@ body {
   color: var(--text-dark);
 }
 
+.kpi-value-lines {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.kpi-value-lines div + div {
+  margin-top: 2px;
+}
+
 .kpi-sub {
   font-size: 11px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* ── Tab content panel ───────────────────────────────── */
@@ -360,7 +370,7 @@ body {
   background-color: var(--surface);
   border: 1px solid var(--border-light);
   border-radius: 6px;
-  padding: 20px;
+  padding: 8px 16px 14px;
   box-shadow: var(--shadow);
 }
 
@@ -479,6 +489,27 @@ body {
   border-top: 3px solid var(--primary);
 }
 
+button.funnel-stat-card {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+}
+
+.funnel-stat-card--link {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.funnel-stat-card--link:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.funnel-stat-card--link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .funnel-stat-value {
   font-size: 1.25rem;
   font-weight: bold;
@@ -492,6 +523,57 @@ body {
   line-height: 1.3;
 }
 
+/* ── HTML bar charts ───────────────────────────────── */
+
+.bar-chart-html {
+  padding: 8px 12px 12px;
+}
+
+.bar-chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 38%) minmax(48px, 1fr) auto;
+  gap: 6px 10px;
+  align-items: center;
+  min-height: 26px;
+  margin-bottom: 5px;
+}
+
+.bar-chart-row-clickable {
+  cursor: pointer;
+}
+
+.bar-chart-row-clickable:hover .bar-chart-fill {
+  filter: brightness(1.05);
+}
+
+.bar-chart-label {
+  font-size: 11px;
+  color: #535c69;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.bar-chart-track {
+  height: 16px;
+  background: #eef2f4;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-chart-fill {
+  height: 100%;
+  border-radius: 3px;
+  min-width: 2px;
+}
+
+.bar-chart-value {
+  font-size: 11px;
+  color: #828b95;
+  white-space: nowrap;
+}
+
 .funnel-lost-table {
   margin-top: 16px;
 }
@@ -502,13 +584,13 @@ body {
   background-color: var(--primary) !important;
   border: none !important;
   color: white !important;
-  height: 36px;
-  padding: 0 20px;
+  height: 30px;
+  padding: 0 12px;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.15s;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .btn-primary:hover {
@@ -519,12 +601,12 @@ body {
   background-color: #f0f2f4 !important;
   border: 1px solid #c6cdd3 !important;
   color: var(--text) !important;
-  height: 36px;
-  padding: 0 20px;
+  height: 30px;
+  padding: 0 12px;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .btn-secondary:hover {
@@ -956,10 +1038,10 @@ body {
   color: var(--danger);
   border: 1px solid #ffb3b3;
   border-radius: 4px;
-  padding: 0 16px;
-  height: 36px;
+  padding: 0 12px;
+  height: 30px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
 }
 

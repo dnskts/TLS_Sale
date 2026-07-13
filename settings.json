@@ -17,6 +17,10 @@
     "metrics": {
         "profit_field": "profit_ex_vat",
         "bitrix_success_value": "Успех",
+        "bitrix_refund_statuses": [
+            "Возврат подтверждён",
+            "Возврат"
+        ],
         "bitrix_date_field": "client_paid_at",
         "bitrix_date_fallback": "deal_created_at",
         "one_c_date_field": "date_operation"
@@ -25,6 +29,111 @@
         "period": "month_to_date",
         "show_inactive_agents": false,
         "source": "all"
+    },
+    "sales_plans": {
+        "2026-07": {
+            "total": 50000000,
+            "by_team": {},
+            "by_agent": {}
+        }
+    },
+    "funnel": {
+        "stage_order": [],
+        "stage_probabilities": {},
+        "final_stages": [
+            "Контроль сделки",
+            "Партнер подтвердил бронь"
+        ],
+        "risk_statuses": [
+            "Переговоры",
+            "Сомневается",
+            "Клиент не вернулся с фидбэком"
+        ],
+        "sla_days_by_stage": {},
+        "stuck_days_default": 14,
+        "inactive_days_default": 7,
+        "activity_channels": [
+            "Call",
+            "Встреча с клиентом"
+        ],
+        "high_amount_threshold": 500000
+    },
+    "category_aliases": {
+        "Отельный билет": "Отель",
+        "Виза": "Визы",
+        "ВИП Обслуживание": "Вип-сервис",
+        "ВИП-обслуживание": "Вип-сервис",
+        "ЖД билет": "Ж.д.",
+        "Организация праздников": "Организация мероприятия",
+        "Товары с доставкой": "Товары",
+        "Cтраховка": "Страховка",
+        "Insurance": "Страховка"
+    },
+    "category_to_request_type": {
+        "Accommodation Hotels TR": "Travel",
+        "Accommodation LS": "Lifestyle",
+        "Air Tickets": "Travel",
+        "Cruise": "Travel",
+        "Delivery services": "Lifestyle",
+        "Education": "Lifestyle",
+        "Hire&Rental LS": "Lifestyle",
+        "Hire&Rental TR": "Travel",
+        "Information only LS": "Lifestyle",
+        "Information only TR": "Travel",
+        "Other TR": "Travel",
+        "Rail Tickets": "Travel",
+        "Retail": "Lifestyle",
+        "Sightseeing LS": "Lifestyle",
+        "Sightseeing TR": "Travel",
+        "Tickets": "Travel",
+        "VIP service at the airport": "Travel",
+        "VISA": "Lifestyle",
+        "Авиабилет": "Travel",
+        "Аппартаменты / квартиры": "Travel",
+        "Аренда авто без водителя": "Travel",
+        "Аренда транспорта c водителем": "Travel",
+        "Аренда транспорта без водителя": "Travel",
+        "Билеты на мероприятие": "Lifestyle",
+        "Визы": "Travel",
+        "Виллы": "Travel",
+        "Вип-сервис": "Travel",
+        "Гольф": "Lifestyle",
+        "Доставка": "Lifestyle",
+        "Ж.д.": "Travel",
+        "Индивидуальная услуга": "Lifestyle",
+        "Инструктор": "Lifestyle",
+        "Инфозапрос баллы": "Lifestyle",
+        "Инфозапрос другое": "Lifestyle",
+        "Консультация по картам МБ": "Lifestyle",
+        "Круиз": "Travel",
+        "Медицина": "Lifestyle",
+        "Образование": "Lifestyle",
+        "Организация мероприятия": "Lifestyle",
+        "Отель": "Travel",
+        "Перевод": "Lifestyle",
+        "Переговорная": "Lifestyle",
+        "Подбор персонал": "Lifestyle",
+        "Подборка достопримечательностей": "Lifestyle",
+        "Подборка мероприятий": "Lifestyle",
+        "Подборка подарков": "Lifestyle",
+        "Подборка ресторанов": "",
+        "Потерянные вещи": "Lifestyle",
+        "Претензия": "Lifestyle",
+        "Ресторан": "Lifestyle",
+        "СПА&Фитнес": "Lifestyle",
+        "Сертификат": "Lifestyle",
+        "Страховка": "Travel",
+        "Товары": "Lifestyle",
+        "Трансфер/Авто в распоряжение": "Travel",
+        "Турпакет": "Travel",
+        "Цветы": "Lifestyle",
+        "Частный самолет": "Travel",
+        "Экскурсия": "Travel",
+        "Яхта": "Travel"
+    },
+    "request_type_aliases": {
+        "Air Tickets": "Travel",
+        "Air tickets": "Travel"
     },
     "department_map": {
         "Centurion": "Центурион",

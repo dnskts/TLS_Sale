@@ -10,6 +10,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
 require_lib('settings.php');
 require_lib('auth.php');
+require_lib('analytics_settings.php');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -49,6 +50,8 @@ if ($method === 'GET') {
         'defaults' => $settings['defaults'] ?? [],
         'ui' => $settings['ui'] ?? ['agents_page_size' => 25],
         'paths' => $settings['paths'] ?? [],
+        'funnel' => funnel_config($settings),
+        'sales_plans' => $settings['sales_plans'] ?? [],
     ]);
 }
 
@@ -61,6 +64,8 @@ if ($method === 'POST') {
     $app = $body['app'] ?? null;
     $defaults = $body['defaults'] ?? null;
     $ui = $body['ui'] ?? null;
+    $funnel = $body['funnel'] ?? null;
+    $salesPlans = $body['sales_plans'] ?? null;
 
     if (!is_array($agents)) {
         json_response(['ok' => false, 'error' => 'Нужен массив agents'], 400);
@@ -150,6 +155,12 @@ if ($method === 'POST') {
         if (in_array($pageSize, [25, 50, 100], true)) {
             $settings['ui']['agents_page_size'] = $pageSize;
         }
+    }
+    if (is_array($funnel)) {
+        $settings['funnel'] = array_merge(funnel_config($settings), $funnel);
+    }
+    if (is_array($salesPlans)) {
+        $settings['sales_plans'] = $salesPlans;
     }
     save_settings($settings);
 

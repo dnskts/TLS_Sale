@@ -27,6 +27,13 @@ function bitrix_export_header_aliases(): array
         'Лид' => 'lead_id',
         'Тип запроса' => 'request_type',
         'Дата оказания услуги' => 'service_date',
+        'Дата оплаты Клиентом' => 'client_paid_at',
+        'Плановая дата закрытия' => 'planned_close_date',
+        'Дата последней активности' => 'last_activity_at',
+        'Источник' => 'lead_source',
+        'Маркетинговый канал' => 'lead_source',
+        'Количество звонков' => 'calls_count',
+        'Количество встреч' => 'meetings_count',
         'Результат сделки' => 'deal_result',
         'Причина стадии Сделка проиграна' => 'lost_deal_reason',
         'Полное наименование организации' => 'partner',
@@ -71,8 +78,20 @@ function enrich_bitrix_export_row(array $row): array
     unset($row['_total_client_pay'], $row['_commission']);
 
     $created = $row['deal_created_at'] ?? null;
-    $row['client_paid_at'] = null;
-    if ($created) {
+    if (empty($row['client_paid_at'])) {
+        $row['client_paid_at'] = null;
+    } else {
+        $row['client_paid_at'] = to_datetime_string($row['client_paid_at']);
+    }
+    foreach (['planned_close_date', 'last_activity_at'] as $dc) {
+        if (!empty($row[$dc])) {
+            $row[$dc] = to_datetime_string($row[$dc]);
+        }
+    }
+    if ($row['client_paid_at']) {
+        $row['date_for_sales'] = substr((string) $row['client_paid_at'], 0, 10);
+        $row['date_fallback_used'] = false;
+    } elseif ($created) {
         $row['date_for_sales'] = substr((string) $created, 0, 10);
         $row['date_fallback_used'] = true;
     } else {
@@ -116,18 +135,18 @@ function parse_bitrix_export(string $path, string $sheetName): array
         foreach ([
             'deal_title', 'deal_status', 'responsible_person', 'client_type', 'client',
             'card_type', 'partner', 'category', 'channel', 'request_type',
-            'deal_result', 'lost_deal_reason', 'id_client', 'agent_sale_participation',
+            'deal_result', 'lost_deal_reason', 'id_client', 'agent_sale_participation', 'lead_source',
         ] as $c) {
             if (array_key_exists($c, $row)) {
                 $row[$c] = clean_str($row[$c]);
             }
         }
-        foreach (['deal_no', 'lead_id', 'service_fee', '_commission', '_total_client_pay'] as $c) {
+        foreach (['deal_no', 'lead_id', 'service_fee', '_commission', '_total_client_pay', 'calls_count', 'meetings_count'] as $c) {
             if (array_key_exists($c, $row)) {
                 $row[$c] = to_float($row[$c]);
             }
         }
-        foreach (['deal_created_at', 'service_date'] as $c) {
+        foreach (['deal_created_at', 'service_date', 'client_paid_at', 'planned_close_date', 'last_activity_at'] as $c) {
             if (array_key_exists($c, $row)) {
                 $row[$c] = to_datetime_string($row[$c]);
             }

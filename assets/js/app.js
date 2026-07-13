@@ -97,9 +97,9 @@
   }
 
   function effectiveSourceForKpi() {
-    if (state.tab === 'funnel-1c') return '1c';
-    if (state.tab === 'funnel-bitrix') return 'bitrix';
-    if (state.tab === 'funnel-unified') return 'all';
+    if (state.tab === 'funnel' && window.TabFunnel && TabFunnel.subTab === '1c') return '1c';
+    if (state.tab === 'funnel' && window.TabFunnel && TabFunnel.subTab === 'bitrix') return 'bitrix';
+    if (state.tab === 'funnel') return 'all';
     var el = document.getElementById('filter-source');
     return el ? (el.value || 'all') : 'all';
   }
@@ -143,7 +143,6 @@
       teams: msValues('team'),
       agents: msValues('agent'),
       show_inactive_agents: document.getElementById('filter-inactive').checked,
-      show_unknown_agents: document.getElementById('filter-unknown').checked,
       categories: msValues('category'),
       channels: msValues('channel'),
       card_types: msValues('card_type'),
@@ -203,8 +202,8 @@
       { key: 'card_type', wrap: 'filter-card-type-wrap', label: 'Тип карты' },
       { key: 'client_type', wrap: 'filter-client-type-wrap', label: 'Тип клиента' },
       { key: 'request_type', wrap: 'filter-request-type-wrap', label: 'Тип запроса' },
-      { key: 'client', wrap: 'filter-client-wrap', label: 'Клиент', searchable: true },
-      { key: 'partner', wrap: 'filter-partner-wrap', label: 'Партнёр / поставщик', searchable: true },
+      { key: 'client', wrap: 'filter-client-wrap', label: 'Клиент' },
+      { key: 'partner', wrap: 'filter-partner-wrap', label: 'Партнёр' },
     ];
     defs.forEach(function (def) {
       var wrap = document.getElementById(def.wrap);
@@ -215,8 +214,11 @@
           label: def.label,
           placeholder: 'Все',
           options: [],
-          searchable: !!def.searchable,
+          searchable: true,
         });
+      }
+      if (def.key === 'client' || def.key === 'partner') {
+        wrap.classList.add('filter-ms-wide');
       }
     });
   }
@@ -272,8 +274,18 @@
     document.getElementById('kpi-sales').textContent = data.kpi.sales_total;
     document.getElementById('kpi-profit').textContent = data.kpi.profit_total;
     document.getElementById('kpi-margin').textContent = data.kpi.margin;
-    document.getElementById('kpi-deals').textContent = data.kpi.deals_count;
-    document.getElementById('kpi-sub-deals').textContent = data.kpi.deals_sub || '';
+    var dealsEl = document.getElementById('kpi-deals');
+    dealsEl.textContent = '';
+    if (data.kpi.deals_line_2) {
+      var line1 = document.createElement('div');
+      line1.textContent = data.kpi.deals_line_1;
+      var line2 = document.createElement('div');
+      line2.textContent = data.kpi.deals_line_2;
+      dealsEl.appendChild(line1);
+      dealsEl.appendChild(line2);
+    } else {
+      dealsEl.textContent = data.kpi.deals_count || '—';
+    }
     document.getElementById('kpi-extra-title').textContent = data.kpi.extra_title || '';
     document.getElementById('kpi-extra-value').textContent = data.kpi.extra_value || '—';
     document.getElementById('kpi-extra-sub').textContent = data.kpi.extra_sub || '';
@@ -324,12 +336,10 @@
     setActiveTab(state.tab);
     var map = {
       overview: window.TabOverview,
-      agents: window.TabAgents,
-      insights: window.TabInsights,
-      structure: window.TabStructure,
-      'funnel-unified': window.TabFunnelUnified,
-      'funnel-1c': window.TabFunnel1c,
-      'funnel-bitrix': window.TabFunnelBitrix,
+      funnel: window.TabFunnel,
+      team: window.TabTeam,
+      forecast: window.TabForecast,
+      quality: window.TabQuality,
       details: window.TabDetails,
       settings: window.TabSettings,
     };
@@ -416,6 +426,7 @@
   });
 
   initDateInputs();
+  initMultiSelects();
 
   document.getElementById('btn-refresh-data').addEventListener('click', async function () {
     setPipelineLoading(true);
@@ -432,7 +443,6 @@
     }
   });
 
-  initMultiSelects();
   state.filters = collectFilters();
 
   loadFilterOptions()

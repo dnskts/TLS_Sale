@@ -6,6 +6,8 @@
  *
  * Важно: колонки берём ПО НОМЕРУ (0, 1, 2…), а не по названию в шапке.
  * В 1С два столбца с одинаковым именем «Дата операции» — иначе перепутаем.
+ *
+ * Исключение (будущее): колонка «Тип клиента» ищется по заголовку → client_type.
  */
 
 declare(strict_types=1);
@@ -41,9 +43,19 @@ function parse_1c(string $path, string $sheetName): array
         return [];
     }
     // Первая строка — шапка, данные со второй
+    $headerRow = $rawRows[0] ?? [];
     $dataRows = array_slice($rawRows, 1);
     $cols = one_c_columns();
     $colCount = count($cols);
+    // Будущая колонка по имени (когда появится в выгрузке): «Тип клиента» → client_type
+    $clientTypeCol = null;
+    foreach ($headerRow as $idx => $title) {
+        $norm = clean_str(str_replace("\n", ' ', (string) $title));
+        if ($norm === 'Тип клиента') {
+            $clientTypeCol = (int) $idx;
+            break;
+        }
+    }
     $stringCols = [
         'agent', 'issuing_agent', 'supplier', 'card_type', 'case_raw', 'channel', 'category',
         'id_crm', 'client_from_case', 'id_client_from_case', 'related_company', 'case_cost_codes',
@@ -102,6 +114,9 @@ function parse_1c(string $path, string $sheetName): array
             $row['order_no'] = $m[1];
         }
         $row['source'] = '1c';
+        $row['client_type'] = $clientTypeCol !== null
+            ? clean_str($line[$clientTypeCol] ?? null)
+            : null;
         $out[] = $row;
     }
     return $out;

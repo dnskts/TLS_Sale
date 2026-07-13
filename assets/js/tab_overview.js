@@ -1,5 +1,12 @@
 /** tab_overview.js — вкладка «Обзор» (по образцу Сводного отчёта) */
 window.TabOverview = {
+  sectionBlock: function (title, note, innerHtml) {
+    return '<div class="chart-slot chart-slot-wide chart-section-block">' +
+      '<h4 class="chart-slot-title">' + title + '</h4>' +
+      (note ? '<p class="tab-note tab-note-compact">' + note + '</p>' : '') +
+      innerHtml + '</div>';
+  },
+
   pieSlot: function (id, title, note) {
     return '<div class="chart-slot chart-slot-pie">' +
       '<h4 class="chart-slot-title">' + title + '</h4>' +
@@ -38,48 +45,49 @@ window.TabOverview = {
   async render(root, ctx) {
     var self = this;
     root.innerHTML =
-      '<h2>Обзор</h2>' +
       '<div class="charts-grid">' +
       '<div class="chart-slot chart-slot-wide">' +
       '<h4 class="chart-slot-title">Динамика продаж</h4>' +
-      '<p class="tab-note tab-note-compact">По месяцам: продажи и прибыль (sales_unified). Клик по столбцу — детализация за месяц.</p>' +
+      '<p class="tab-note tab-note-compact">По месяцам: продажи и прибыль.</p>' +
       '<div id="ov-trend"></div></div></div>' +
 
-      '<h3 class="chart-section-title">Свод продажи</h3>' +
-      '<p class="tab-note tab-note-compact">Сумма продаж после возврата · клик по сегменту — детализация</p>' +
-      '<div class="charts-grid-4">' +
-      self.pieSlot('ov-src', 'Источник продаж', '1С — операции · Битрикс — оплаченные сделки') +
+      self.sectionBlock('Свод продажи', 'Сумма продаж после возврата',
+        '<div class="charts-grid-4">' +
+      self.pieSlot('ov-src', 'Источник продаж', '1С и Битрикс: продажи минус возвраты') +
       self.pieSlot('ov-team', 'Команда') +
-      self.pieSlot('ov-ctype', 'Тип клиента') +
+      self.pieSlot('ov-ctype', 'Тип клиента', '1С: колонка «Тип клиента» (пока нет — отдельный сегмент) · Битрикс') +
       self.pieSlot('ov-cat', 'Категория') +
       self.pieSlot('ov-ch', 'Канал') +
-      '</div>' +
+      '</div>') +
 
-      '<h3 class="chart-section-title">Свод прибыль</h3>' +
-      '<p class="tab-note tab-note-compact">Прибыль РС ТЛС без НДС</p>' +
-      '<div class="charts-grid-4">' +
+      self.sectionBlock('Свод прибыль', 'Прибыль РС ТЛС без НДС',
+        '<div class="charts-grid-4">' +
       self.pieSlot('ov-pteam', 'Команда') +
       self.pieSlot('ov-pctype', 'Тип клиента') +
       self.pieSlot('ov-pcat', 'Категория') +
       self.pieSlot('ov-pch', 'Канал') +
-      '</div>' +
+      '</div>') +
 
-      '<h3 class="chart-section-title">Свод обращения</h3>' +
-      '<p class="tab-note tab-note-compact">Сделки Битрикс (созданные в периоде) · клик — детализация</p>' +
-      '<div class="charts-grid-4">' +
+      self.sectionBlock('Свод обращения', 'Сделки Битрикс (= кейс). Пироги — за период фильтра; график по месяцам — с начала года',
+        '<div class="charts-grid-4">' +
       self.pieSlot('ov-ares', 'Результат сделки') +
       self.pieSlot('ov-afun', 'Воронка') +
       '<div class="chart-slot chart-slot-wide chart-slot-span-2">' +
-      '<h4 class="chart-slot-title">Создано сделок по месяцам</h4><div id="ov-appeals-trend"></div></div>' +
-      '</div>' +
+      '<h4 class="chart-slot-title">Создано сделок по месяцам</h4>' +
+      '<p class="tab-note tab-note-compact">По дате создания в Битрикс, с января по конец выбранного периода</p>' +
+      '<div id="ov-appeals-trend"></div></div>' +
+      '</div>') +
 
-      '<h3 class="chart-section-title">Статистика по клиенту</h3>' +
-      '<div class="charts-grid-4">' +
+      self.sectionBlock('Статистика по клиенту', '',
+        '<div class="charts-grid-4">' +
       self.pieSlot('ov-cl-type', 'Тип клиента') +
       self.pieSlot('ov-cl-card', 'Тип карты') +
       '<div class="chart-slot chart-slot-span-2">' +
       '<h4 class="chart-slot-title">Топ-10 клиентов по продажам</h4><div id="ov-top-clients"></div></div>' +
-      '</div>';
+      '</div>') +
+
+      self.sectionBlock('Структура продаж', '',
+        '<div class="charts-grid" id="ov-structure-grid"></div>');
 
     var data = ctx.overviewData;
     if (!data) {
@@ -96,18 +104,15 @@ window.TabOverview = {
     SimpleCharts.groupBars('ov-trend', (data.trend || []).map(function (r) {
       return { period: r.period, a: r.sales, b: r.profit };
     }), {
+      horizontal: true,
       legendA: 'Продажи',
       legendB: 'Прибыль',
-      onClick: function (item) {
-        var range = self.monthRange(item.period);
-        if (range) drillSales(range);
-      },
     });
 
     SimpleCharts.pieChart('ov-src', (data.by_source || []).map(function (r) {
       return {
         label: r.label,
-        legendLabel: r.label === '1С' ? '1С — операции' : 'Битрикс — сделки',
+        legendLabel: r.label === '1С' ? '1С — продажи и возвраты' : 'Битрикс — успех и возвраты',
         value: Math.round(r.sales),
       };
     }), {
@@ -159,6 +164,7 @@ window.TabOverview = {
       return { period: r.period, a: r.count, b: 0 };
     }), {
       legendA: 'Создано',
+      valueFormat: 'count',
       onClick: function (item) {
         var range = self.monthRange(item.period);
         if (range) drillDeals(range);
@@ -174,7 +180,27 @@ window.TabOverview = {
     SimpleCharts.barChart('ov-top-clients', (data.top_clients || []).map(function (r) {
       return { label: r.label, value: Math.round(r.sales) };
     }), {
+      valueFormat: 'rub',
       onClick: function (item) { drillSales({ clients: [item.label] }); },
+    });
+
+    var structLabels = {
+      category: 'Категория', channel: 'Канал', client_type: 'Тип клиента',
+      card_type: 'Тип карты', request_type: 'Тип запроса', partner: 'Партнёр',
+    };
+    var structKeys = Object.keys(structLabels);
+    document.getElementById('ov-structure-grid').innerHTML = structKeys.map(function (key) {
+      return '<div class="chart-slot"><h4 class="chart-slot-title">' + structLabels[key] + '</h4><div id="ov-st-' + key + '"></div></div>';
+    }).join('');
+    var structData = await ctx.api('api/structure.php', ctx.filters);
+    structKeys.forEach(function (key) {
+      SimpleCharts.barChart('ov-st-' + key, (structData[key] || []).map(function (r) {
+        return { label: r.label, value: Math.round(r.sales), count: r.count || 0 };
+      }), {
+        valueFormat: 'rub',
+        showCount: true,
+        countLabel: 'сделок',
+      });
     });
   },
 };

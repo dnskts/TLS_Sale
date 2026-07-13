@@ -46,13 +46,17 @@ function summarize_sales(array $rows): array
         if (($row['source'] ?? '') === '1c') {
             $sales1c += $sales;
             $count1c += $w;
-            if ($sales < 0) {
+            if ($sales < 0 || !empty($row['is_refund'])) {
                 $refundSum += $sales;
                 $refundCount += $w;
             }
         } elseif (($row['source'] ?? '') === 'bitrix') {
             $salesBitrix += $sales;
             $countBitrix += $w;
+            if ($sales < 0 || !empty($row['is_refund'])) {
+                $refundSum += $sales;
+                $refundCount += $w;
+            }
         }
     }
 
@@ -267,7 +271,7 @@ function group_deals_by_funnel(array $rows): array
 }
 
 /** Динамика количества сделок по месяцам (deal_created_at). */
-function deals_count_trend(array $rows, string $granularity = 'month'): array
+function deals_count_trend(array $rows, string $granularity = 'month', ?string $padFrom = null, ?string $padTo = null): array
 {
     $buckets = [];
     foreach ($rows as $row) {
@@ -292,6 +296,42 @@ function deals_count_trend(array $rows, string $granularity = 'month'): array
         }
         $buckets[$period]['count'] += row_weight($row);
     }
+    if ($granularity === 'month' && $padFrom && $padTo) {
+        $start = DateTime::createFromFormat('Y-m-d', substr($padFrom, 0, 7) . '-01')
+            ?: DateTime::createFromFormat('Y-m', substr($padFrom, 0, 7));
+        $end = DateTime::createFromFormat('Y-m-d', substr($padTo, 0, 7) . '-01')
+            ?: DateTime::createFromFormat('Y-m', substr($padTo, 0, 7));
+        if ($start && $end && $start <= $end) {
+            $out = [];
+            $cur = clone $start;
+            while ($cur <= $end) {
+                $p = $cur->format('Y-m');
+                $out[] = $buckets[$p] ?? ['period' => $p, 'count' => 0];
+                $cur->modify('+1 month');
+            }
+            return $out;
+        }
+    }
     ksort($buckets);
     return array_values($buckets);
+}
+
+/**
+ * Для графика «создано сделок по месяцам»: с начала года по date_to
+ * (команды/агенты те же, период KPI не расширяем).
+ *
+ * @param array<string, mixed> $filters
+ * @return array<string, mixed>
+ */
+function filters_for_appeals_trend(array $filters): array
+{
+    $dateTo = clean_str($filters['date_to'] ?? null) ?? date('Y-m-d');
+    $y = (int) substr($dateTo, 0, 4);
+    if ($y < 2000) {
+        $y = (int) date('Y');
+        $dateTo = date('Y-m-d');
+    }
+    $filters['date_from'] = sprintf('%04d-01-01', $y);
+    $filters['date_to'] = $dateTo;
+    return $filters;
 }

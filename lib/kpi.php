@@ -36,6 +36,8 @@ function build_kpi_payload(array $rows, array $ops1c, array $dealsBx, array $fil
 
     $dealsCount = '—';
     $dealsSub = '1С и Битрикс';
+    $dealsLine1 = null;
+    $dealsLine2 = null;
     $extraTitle = 'Доля 1С / Битрикс';
     $extraValue = '—';
     $extraSub = 'по сумме продаж';
@@ -55,6 +57,8 @@ function build_kpi_payload(array $rows, array $ops1c, array $dealsBx, array $fil
     } else {
         $dealsCount = '1С: ' . format_count($opsTotal) . ' · Битрикс: ' . format_count($dealsTotal);
         $dealsSub = 'операции 1С · сделки Битрикс';
+        $dealsLine1 = '1С: ' . format_count($opsTotal);
+        $dealsLine2 = 'Битрикс: ' . format_count($dealsTotal);
         $extraValue = ($summary['share_1c_pct'] !== null)
             ? format_pct($summary['share_1c_pct']) . ' / ' . format_pct($summary['share_bitrix_pct'])
             : '—';
@@ -66,6 +70,8 @@ function build_kpi_payload(array $rows, array $ops1c, array $dealsBx, array $fil
         'margin' => format_pct($summary['margin_pct']),
         'deals_count' => $dealsCount,
         'deals_sub' => $dealsSub,
+        'deals_line_1' => $dealsLine1,
+        'deals_line_2' => $dealsLine2,
         'extra_title' => $extraTitle,
         'extra_value' => $extraValue,
         'extra_sub' => $extraSub,

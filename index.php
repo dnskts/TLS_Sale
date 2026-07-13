@@ -44,12 +44,10 @@ $monthStart = date('Y-m-01');
         <h1 class="sidebar-title"><?= htmlspecialchars($title) ?></h1>
         <nav class="sidebar-nav" id="main-nav">
             <button type="button" class="nav-tab active" data-tab="overview">Обзор</button>
-            <button type="button" class="nav-tab" data-tab="agents">Агенты и команды</button>
-            <button type="button" class="nav-tab" data-tab="insights">Советы руководителю</button>
-            <button type="button" class="nav-tab" data-tab="structure">Структура продаж</button>
-            <button type="button" class="nav-tab" data-tab="funnel-unified">Воронка Общая</button>
-            <button type="button" class="nav-tab" data-tab="funnel-1c">Воронка 1С</button>
-            <button type="button" class="nav-tab" data-tab="funnel-bitrix">Воронка Битрикс</button>
+            <button type="button" class="nav-tab" data-tab="funnel">Воронка</button>
+            <button type="button" class="nav-tab" data-tab="team">Команда</button>
+            <button type="button" class="nav-tab" data-tab="forecast">Прогноз и риски</button>
+            <button type="button" class="nav-tab" data-tab="quality">Качество и потери</button>
             <button type="button" class="nav-tab" data-tab="details">Детализация</button>
         </nav>
         <div class="sidebar-footer">
@@ -79,7 +77,6 @@ $monthStart = date('Y-m-01');
 
     <div class="main-content">
         <div id="filters-panel" class="filters-panel">
-            <h3 class="filters-title">Фильтры</h3>
             <div class="filters-grid filters-grid-main">
                 <div class="filter-field filter-period">
                     <label class="filter-label">Период</label>
@@ -114,7 +111,6 @@ $monthStart = date('Y-m-01');
                         <label class="filter-label">Агенты</label>
                         <div class="filter-pills">
                             <label class="filter-pill"><input type="checkbox" id="filter-inactive"><span>Неактивные</span></label>
-                            <label class="filter-pill"><input type="checkbox" id="filter-unknown"><span>Не в справочнике</span></label>
                         </div>
                     </div>
                     <div class="filter-field" id="filter-category-wrap"></div>
@@ -133,9 +129,9 @@ $monthStart = date('Y-m-01');
 
         <div id="kpi-container" class="kpi-container">
             <div class="kpi-card"><div class="kpi-title">Продажи</div><div class="kpi-value" id="kpi-sales">—</div><div class="kpi-sub" id="kpi-sub-sales">1С + Битрикс</div></div>
-            <div class="kpi-card"><div class="kpi-title">Прибыль без НДС</div><div class="kpi-value" id="kpi-profit">—</div><div class="kpi-sub" id="kpi-sub-profit">profit_ex_vat</div></div>
+            <div class="kpi-card"><div class="kpi-title">Прибыль</div><div class="kpi-value" id="kpi-profit">—</div><div class="kpi-sub" id="kpi-sub-profit">без НДС</div></div>
             <div class="kpi-card"><div class="kpi-title">Маржа</div><div class="kpi-value" id="kpi-margin">—</div><div class="kpi-sub" id="kpi-sub-margin">прибыль / продажи</div></div>
-            <div class="kpi-card"><div class="kpi-title">Сделки</div><div class="kpi-value" id="kpi-deals">—</div><div class="kpi-sub" id="kpi-sub-deals">1С и Битрикс</div></div>
+            <div class="kpi-card"><div class="kpi-title">Сделки</div><div class="kpi-value kpi-value-lines" id="kpi-deals">—</div></div>
             <div class="kpi-card" id="kpi-extra-card"><div class="kpi-title" id="kpi-extra-title">Доля 1С / Битрикс</div><div class="kpi-value" id="kpi-extra-value">—</div><div class="kpi-sub" id="kpi-extra-sub">по сумме продаж</div></div>
             <div class="kpi-card"><div class="kpi-title">Средний чек</div><div class="kpi-value" id="kpi-avg-check">—</div><div class="kpi-sub" id="kpi-sub-avg-check">продажи / кол-во</div></div>
         </div>
@@ -147,17 +143,17 @@ $monthStart = date('Y-m-01');
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="assets/js/charts_simple.js"></script>
+<script src="assets/js/echarts_charts.js"></script>
 <script src="assets/js/multi_select.js"></script>
 <script src="assets/js/settings_editor.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="assets/js/tab_overview.js"></script>
-<script src="assets/js/tab_agents.js"></script>
-<script src="assets/js/tab_insights.js"></script>
-<script src="assets/js/tab_structure.js"></script>
-<script src="assets/js/tab_funnel_unified.js"></script>
-<script src="assets/js/tab_funnel_1c.js"></script>
-<script src="assets/js/tab_funnel_bitrix.js"></script>
+<script src="assets/js/tab_funnel.js"></script>
+<script src="assets/js/tab_team.js"></script>
+<script src="assets/js/tab_forecast.js"></script>
+<script src="assets/js/tab_quality.js"></script>
 <script src="assets/js/tab_details.js"></script>
 <script src="assets/js/tab_settings.js"></script>
 </body>

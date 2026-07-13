@@ -109,6 +109,8 @@ window.SettingsEditor = (function () {
     this.defaults = Object.assign({ source: 'all', show_inactive_agents: false }, data.defaults || {});
     this.ui = Object.assign({ agents_page_size: 25 }, data.ui || {});
     this.paths = data.paths || {};
+    this.funnel = Object.assign({}, data.funnel || {});
+    this.salesPlans = Object.assign({}, data.sales_plans || {});
     this.dismissed = (data.dismissed_agent_warnings || []).slice();
     this.selected = {};
     this.search = '';
@@ -238,6 +240,28 @@ window.SettingsEditor = (function () {
       '<thead><tr><th>Команда</th><th>Агентов</th><th></th></tr></thead><tbody></tbody></table></div>' +
       '</div></details>' +
 
+      '<details class="settings-collapsible settings-section-analytics">' +
+      '<summary class="settings-collapsible-summary">Аналитика: планы и SLA</summary>' +
+      '<div class="settings-collapsible-body">' +
+      '<p class="tab-note">План продаж на текущий месяц (YYYY-MM берётся из периода фильтра). Вероятности стадий — JSON.</p>' +
+      '<div class="settings-general-compact">' +
+      '<div class="form-row settings-general-field"><label class="form-label">План total (₽)</label>' +
+      '<input type="number" id="set-plan-total" class="input-field" min="0" step="1000"></div>' +
+      '<div class="form-row settings-general-field"><label class="form-label">Зависшие (дней)</label>' +
+      '<input type="number" id="set-stuck-days" class="input-field" min="1"></div>' +
+      '<div class="form-row settings-general-field"><label class="form-label">Без активности (дней)</label>' +
+      '<input type="number" id="set-inactive-days" class="input-field" min="1"></div>' +
+      '<div class="form-row settings-general-field"><label class="form-label">Порог суммы риска</label>' +
+      '<input type="number" id="set-high-amount" class="input-field" min="0"></div>' +
+      '</div>' +
+      '<div class="form-row"><label class="form-label">Порядок стадий (по одной на строку)</label>' +
+      '<textarea id="set-stage-order" class="input-field settings-textarea" rows="4"></textarea></div>' +
+      '<div class="form-row"><label class="form-label">Вероятности стадий (JSON: {"Стадия": 0.5})</label>' +
+      '<textarea id="set-stage-probs" class="input-field settings-textarea" rows="4"></textarea></div>' +
+      '<div class="form-row"><label class="form-label">SLA по стадиям (JSON: {"Стадия": 14})</label>' +
+      '<textarea id="set-sla-days" class="input-field settings-textarea" rows="3"></textarea></div>' +
+      '</div></details>' +
+
       '<section class="settings-section">' +
       '<h3>Агенты</h3>' +
       '<p class="tab-note">Справочник соответствия имён 1С и Битрикс. Агент может быть в нескольких командах.</p>' +
@@ -363,6 +387,10 @@ window.SettingsEditor = (function () {
       self.renderAgentsTable();
     };
     document.getElementById('set-default-inactive').onchange = function () { self.markDirty(); };
+    ['set-plan-total', 'set-stuck-days', 'set-inactive-days', 'set-high-amount', 'set-stage-order', 'set-stage-probs', 'set-sla-days'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.oninput = function () { self.markDirty(); };
+    });
     document.getElementById('agents-select-all').onchange = function (ev) {
       self.toggleSelectAllPage(ev.target.checked);
     };
@@ -389,11 +417,25 @@ window.SettingsEditor = (function () {
     });
   };
 
+  Editor.prototype.planPeriodKey = function () {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+
   Editor.prototype.render = function () {
     document.getElementById('set-app-title').value = this.app.title || '';
     document.getElementById('set-default-source').value = this.defaults.source || 'all';
     document.getElementById('set-default-inactive').checked = !!this.defaults.show_inactive_agents;
     document.getElementById('set-page-size').value = String(this.ui.agents_page_size || 25);
+    var period = this.planPeriodKey();
+    var plan = this.salesPlans[period] || {};
+    document.getElementById('set-plan-total').value = plan.total != null ? plan.total : '';
+    document.getElementById('set-stuck-days').value = this.funnel.stuck_days_default != null ? this.funnel.stuck_days_default : 14;
+    document.getElementById('set-inactive-days').value = this.funnel.inactive_days_default != null ? this.funnel.inactive_days_default : 7;
+    document.getElementById('set-high-amount').value = this.funnel.high_amount_threshold != null ? this.funnel.high_amount_threshold : 500000;
+    document.getElementById('set-stage-order').value = (this.funnel.stage_order || []).join('\n');
+    document.getElementById('set-stage-probs').value = JSON.stringify(this.funnel.stage_probabilities || {}, null, 2);
+    document.getElementById('set-sla-days').value = JSON.stringify(this.funnel.sla_days_by_stage || {}, null, 2);
     document.getElementById('settings-paths-info').innerHTML =
       '<strong>Файлы:</strong> ' + esc(this.paths.input_dir || 'input') + '/' +
       esc(this.paths.file_1c || '1C.xlsx') + ', ' + esc(this.paths.file_bitrix || 'Битрикс.xlsx');
@@ -873,6 +915,23 @@ window.SettingsEditor = (function () {
         names_bitrix: a.names_bitrix || [],
       };
     });
+    var period = this.planPeriodKey();
+    var planTotal = parseFloat(document.getElementById('set-plan-total').value) || 0;
+    var salesPlans = Object.assign({}, this.salesPlans);
+    salesPlans[period] = Object.assign({}, salesPlans[period] || {}, { total: planTotal, by_team: (salesPlans[period] || {}).by_team || {}, by_agent: (salesPlans[period] || {}).by_agent || {} });
+    var stageOrder = String(document.getElementById('set-stage-order').value || '').split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var stageProbs = {};
+    var slaDays = {};
+    try { stageProbs = JSON.parse(document.getElementById('set-stage-probs').value || '{}'); } catch (e) { stageProbs = this.funnel.stage_probabilities || {}; }
+    try { slaDays = JSON.parse(document.getElementById('set-sla-days').value || '{}'); } catch (e) { slaDays = this.funnel.sla_days_by_stage || {}; }
+    var funnel = Object.assign({}, this.funnel, {
+      stage_order: stageOrder,
+      stage_probabilities: stageProbs,
+      sla_days_by_stage: slaDays,
+      stuck_days_default: parseInt(document.getElementById('set-stuck-days').value, 10) || 14,
+      inactive_days_default: parseInt(document.getElementById('set-inactive-days').value, 10) || 7,
+      high_amount_threshold: parseFloat(document.getElementById('set-high-amount').value) || 500000,
+    });
     return {
       agents: agents,
       teams: this.teams.slice().sort(),
@@ -883,6 +942,8 @@ window.SettingsEditor = (function () {
         show_inactive_agents: document.getElementById('set-default-inactive').checked,
       },
       ui: { agents_page_size: parseInt(document.getElementById('set-page-size').value, 10) || 25 },
+      funnel: funnel,
+      sales_plans: salesPlans,
     };
   };
 
