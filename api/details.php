@@ -66,6 +66,15 @@ if ($view === 'deals_bitrix') {
     }
 }
 
+$salesBreakdown = null;
+if ($view === 'sales') {
+    $salesBreakdown = ['1c' => 0, 'bitrix' => 0];
+    foreach ($rows as $r) {
+        $src = ($r['source'] ?? '') === '1c' ? '1c' : 'bitrix';
+        $salesBreakdown[$src]++;
+    }
+}
+
 json_response([
     'ok' => true,
     'view' => $view,
@@ -73,4 +82,5 @@ json_response([
     'rows' => $display,
     'meta' => $meta,
     'total' => count($rows),
+    'sales_breakdown' => $salesBreakdown,
 ]);

@@ -131,7 +131,7 @@ $monthStart = date('Y-m-01');
             <div class="kpi-card"><div class="kpi-title">Продажи</div><div class="kpi-value" id="kpi-sales">—</div><div class="kpi-sub" id="kpi-sub-sales">1С + Битрикс</div></div>
             <div class="kpi-card"><div class="kpi-title">Прибыль</div><div class="kpi-value" id="kpi-profit">—</div><div class="kpi-sub" id="kpi-sub-profit">без НДС</div></div>
             <div class="kpi-card"><div class="kpi-title">Маржа</div><div class="kpi-value" id="kpi-margin">—</div><div class="kpi-sub" id="kpi-sub-margin">прибыль / продажи</div></div>
-            <div class="kpi-card"><div class="kpi-title">Сделки</div><div class="kpi-value kpi-value-lines" id="kpi-deals">—</div></div>
+            <div class="kpi-card"><div class="kpi-title">Сделки</div><div class="kpi-value kpi-value-lines" id="kpi-deals">—</div><div class="kpi-sub" id="kpi-sub-deals">1С: операции · Битрикс: созданные</div></div>
             <div class="kpi-card" id="kpi-extra-card"><div class="kpi-title" id="kpi-extra-title">Доля 1С / Битрикс</div><div class="kpi-value" id="kpi-extra-value">—</div><div class="kpi-sub" id="kpi-extra-sub">по сумме продаж</div></div>
             <div class="kpi-card"><div class="kpi-title">Средний чек</div><div class="kpi-value" id="kpi-avg-check">—</div><div class="kpi-sub" id="kpi-sub-avg-check">продажи / кол-во</div></div>
         </div>

@@ -286,6 +286,8 @@
     } else {
       dealsEl.textContent = data.kpi.deals_count || '—';
     }
+    var dealsSubEl = document.getElementById('kpi-sub-deals');
+    if (dealsSubEl) dealsSubEl.textContent = data.kpi.deals_sub || '';
     document.getElementById('kpi-extra-title').textContent = data.kpi.extra_title || '';
     document.getElementById('kpi-extra-value').textContent = data.kpi.extra_value || '—';
     document.getElementById('kpi-extra-sub').textContent = data.kpi.extra_sub || '';

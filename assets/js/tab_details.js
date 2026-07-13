@@ -3,7 +3,7 @@ window.TabDetails = {
   BITRIX_DEAL_URL: 'https://crm.rstls.ru/crm/deal/details/',
 
   VIEW_HEADERS: {
-    sales: ['Дата', 'Источник', 'Агент', 'Команда', 'Клиент', 'Категория', 'Канал', 'Продажи', 'Прибыль', 'ID'],
+    sales: ['Дата', 'Источник', 'Агент', 'Команда', 'Клиент', 'Категория', 'Канал', 'Продажи', 'Прибыль', '№ сделки / ID'],
     deals_bitrix: ['Дата создания', '№ сделки', 'Статус', 'Результат', 'Клиент', 'Ответственный', 'Сумма', 'Причина проигрыша'],
     operations_1c: ['Дата', 'Агент', 'Команда', 'Подразделение 1С', 'Категория', 'Клиент', 'Сумма', '№ заказа'],
   },
@@ -63,7 +63,12 @@ window.TabDetails = {
     if (view === 'operations_1c') {
       return [r.date, r.agent, r.agent_team, r.department, r.category, r.client, r.sales_amount, r.order_no];
     }
-    return [r.date, r.source, r.agent_display, r.agent_team, r.client || '', r.category || '', r.channel || '', r.sales_amount, r.profit_ex_vat, r.raw_id || ''];
+    var idCell = r.raw_id || '';
+    // Битрикс raw_id = № сделки → ссылка в CRM; 1С — номер заказа без ссылки.
+    if (r.source === 'Битрикс') {
+      idCell = this.dealNoLink(r.raw_id);
+    }
+    return [r.date, r.source, r.agent_display, r.agent_team, r.client || '', r.category || '', r.channel || '', r.sales_amount, r.profit_ex_vat, idCell];
   },
 
   async render(root, ctx) {
@@ -76,6 +81,7 @@ window.TabDetails = {
 
     var data = await ctx.api('api/details.php', ctx.filters);
     var view = data.view || 'sales';
+    var tableRows = data.rows || [];
     var activeDrill = self.activeDrillLabels(ctx.drill, data.drill);
 
     var drillHtml = '';
@@ -96,13 +102,21 @@ window.TabDetails = {
     }
 
     var viewLabel = view === 'deals_bitrix' ? 'сделки Битрикс' : (view === 'operations_1c' ? 'операции 1С' : 'продажи');
+    var metaNote = tableRows.length < data.total
+      ? ('Показано ' + tableRows.length + ' из ' + data.total + ' (' + viewLabel + '; лимит API 2000)')
+      : ('Строк: ' + data.total + ' (' + viewLabel + ')');
+    if (view === 'sales' && data.sales_breakdown) {
+      metaNote +=
+        ' · 1С: ' + (data.sales_breakdown['1c'] || 0) +
+        ' + Битрикс (успех/возврат): ' + (data.sales_breakdown.bitrix || 0);
+    }
     document.getElementById('dt-meta').innerHTML =
-      '<p class="tab-note tab-note-compact">Показано ' + data.rows.length + ' из ' + data.total + ' (' + viewLabel + ')</p>';
+      '<p class="tab-note tab-note-compact">' + metaNote + '</p>';
 
     var headers = this.VIEW_HEADERS[view] || this.VIEW_HEADERS.sales;
     document.getElementById('dt-table').innerHTML = detailsTableHtml(
       headers,
-      (data.rows || []).slice(0, 200).map(function (r) {
+      tableRows.map(function (r) {
         return self.rowToCells(view, r);
       })
     );

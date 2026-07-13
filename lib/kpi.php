@@ -56,7 +56,7 @@ function build_kpi_payload(array $rows, array $ops1c, array $dealsBx, array $fil
         $extraSub = 'успех / создано';
     } else {
         $dealsCount = '1С: ' . format_count($opsTotal) . ' · Битрикс: ' . format_count($dealsTotal);
-        $dealsSub = 'операции 1С · сделки Битрикс';
+        $dealsSub = '1С: все операции · Битрикс: все созданные (не только успех)';
         $dealsLine1 = '1С: ' . format_count($opsTotal);
         $dealsLine2 = 'Битрикс: ' . format_count($dealsTotal);
         $extraValue = ($summary['share_1c_pct'] !== null)
