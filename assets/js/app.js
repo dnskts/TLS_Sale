@@ -251,7 +251,7 @@
     var kpiFilters = Object.assign({}, state.filters, { source: source });
     var data = preloaded;
     if (!data) {
-      data = await api('api/overview.php', kpiFilters);
+      data = await api('api/kpi.php', kpiFilters);
     }
     document.getElementById('kpi-sales').textContent = data.kpi.sales_total;
     document.getElementById('kpi-profit').textContent = data.kpi.profit_total;

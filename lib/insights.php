@@ -60,7 +60,7 @@ function insight_agent_stats(array $rows): array
         $sales = (float) ($row['sales_amount'] ?? 0);
         $agents[$key]['sales'] += $sales;
         $agents[$key]['profit'] += (float) ($row['profit_ex_vat'] ?? 0);
-        $agents[$key]['count']++;
+        $agents[$key]['count'] += row_weight($row);
     }
     foreach ($agents as &$a) {
         $a['margin_pct'] = $a['sales'] ? $a['profit'] / $a['sales'] * 100 : null;
@@ -81,12 +81,13 @@ function insight_deals_by_agent(array $deals): array
         if ($key === '') {
             continue;
         }
+        $w = row_weight($row);
         if (!isset($map[$key])) {
             $map[$key] = ['created' => 0, 'success' => 0, 'conversion_pct' => null];
         }
-        $map[$key]['created']++;
+        $map[$key]['created'] += $w;
         if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-            $map[$key]['success']++;
+            $map[$key]['success'] += $w;
         }
     }
     foreach ($map as &$m) {
@@ -102,11 +103,13 @@ function insight_deals_by_agent(array $deals): array
  */
 function insight_refund_stats(array $ops): array
 {
-    $total = count($ops);
+    $total = 0;
     $refunds = 0;
     foreach ($ops as $row) {
+        $w = row_weight($row);
+        $total += $w;
         if ((float) ($row['sales_amount'] ?? 0) < 0) {
-            $refunds++;
+            $refunds += $w;
         }
     }
     return [
@@ -154,7 +157,7 @@ function insight_top_lost_reasons(array $deals, int $limit = 3): array
         if (!$reason) {
             $reason = $result ?? 'Не указана';
         }
-        $lost[$reason] = ($lost[$reason] ?? 0) + 1;
+        $lost[$reason] = ($lost[$reason] ?? 0) + row_weight($row);
     }
     arsort($lost);
     $out = [];
@@ -405,10 +408,23 @@ function insight_manager_checklist(): array
 /** @param array<string, mixed> $filters */
 function compute_insights_payload(array $filters): array
 {
-    $allSales = storage_load_table('sales_unified');
-    $rows = apply_sales_filters($allSales, $filters);
-    $deals = apply_deals_bitrix_filters(storage_load_table('deals_bitrix'), $filters);
-    $ops = apply_operations_1c_filters(storage_load_table('operations_1c'), $filters);
+    require_once __DIR__ . '/storage.php';
+    require_once __DIR__ . '/filters.php';
+    require_once __DIR__ . '/aggregates.php';
+
+    $allSalesRollup = load_sales_rollup_rows();
+    if ($allSalesRollup !== null) {
+        require_once __DIR__ . '/filters.php';
+        $allSales = sales_rollup_to_rows($allSalesRollup);
+        $rows = apply_sales_filters($allSales, $filters);
+        $deals = load_filtered_deals_bitrix($filters);
+        $ops = load_filtered_operations_1c($filters);
+    } else {
+        $allSales = storage_load_table('sales_unified');
+        $rows = apply_sales_filters($allSales, $filters);
+        $deals = apply_deals_bitrix_filters(storage_load_table('deals_bitrix'), $filters);
+        $ops = apply_operations_1c_filters(storage_load_table('operations_1c'), $filters);
+    }
 
     $prevFilters = filters_for_previous_period($filters);
     $prevRows = apply_sales_filters($allSales, $prevFilters);
@@ -427,14 +443,14 @@ function compute_insights_payload(array $filters): array
     $unknownRows = 0;
     foreach ($rows as $row) {
         if (str_starts_with((string) ($row['agent_key'] ?? ''), 'unknown:')) {
-            $unknownRows++;
+            $unknownRows += row_weight($row);
         }
     }
 
     $dealsSuccess = 0;
     foreach ($deals as $row) {
         if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-            $dealsSuccess++;
+            $dealsSuccess += row_weight($row);
         }
     }
 
@@ -444,7 +460,7 @@ function compute_insights_payload(array $filters): array
         'summary' => $summary,
         'prev_summary' => $prevSummary,
         'refund' => $refund,
-        'deals_total' => count($deals),
+        'deals_total' => rows_total_weight($deals),
         'deals_success' => $dealsSuccess,
         'concentration' => $concentration,
         'unknown_agent_rows' => $unknownRows,
@@ -469,7 +485,7 @@ function compute_insights_payload(array $filters): array
             'profit' => $summary['profit_total'],
             'sales' => $summary['sales_total'],
             'margin_pct' => $summary['margin_pct'],
-            'conversion_pct' => count($deals) ? $dealsSuccess / count($deals) * 100 : null,
+            'conversion_pct' => rows_total_weight($deals) ? $dealsSuccess / rows_total_weight($deals) * 100 : null,
             'refund_pct' => $refund['refund_pct'],
             'prev_profit' => $prevSummary['profit_total'],
             'prev_period' => $prevFilters['date_from'] && $prevFilters['date_to']

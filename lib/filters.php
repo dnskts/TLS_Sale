@@ -134,7 +134,6 @@ function apply_sales_filters(array $rows, array $filters): array
  */
 function apply_deals_bitrix_filters(array $rows, array $filters): array
 {
-    // Обогащаем агентом на лету
     $settings = load_settings();
     $enriched = [];
     foreach ($rows as $row) {
@@ -147,7 +146,15 @@ function apply_deals_bitrix_filters(array $rows, array $filters): array
         }
         $enriched[] = $row;
     }
+    return apply_deals_bitrix_filters_on_enriched($enriched, $filters);
+}
 
+/**
+ * Фильтр deals_bitrix для уже обогащённых строк (rollup).
+ * @param list<array> $enriched
+ */
+function apply_deals_bitrix_filters_on_enriched(array $enriched, array $filters): array
+{
     $dateFrom = $filters['date_from'] ?? null;
     $dateTo = $filters['date_to'] ?? null;
     $out = [];
@@ -203,6 +210,15 @@ function apply_operations_1c_filters(array $rows, array $filters): array
         }
         $enriched[] = $row;
     }
+    return apply_operations_1c_filters_on_enriched($enriched, $filters);
+}
+
+/**
+ * Фильтр operations_1c для уже обогащённых строк (rollup).
+ * @param list<array> $enriched
+ */
+function apply_operations_1c_filters_on_enriched(array $enriched, array $filters): array
+{
     $dateFrom = $filters['date_from'] ?? null;
     $dateTo = $filters['date_to'] ?? null;
     $out = [];

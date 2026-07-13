@@ -7,76 +7,25 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
-require_lib('storage.php');
+require_lib('aggregates.php');
 require_lib('filters.php');
 require_lib('metrics.php');
+require_lib('kpi.php');
 
 $filters = read_json_body();
 if ($filters === []) {
     $filters = $_GET;
 }
 $granularity = $filters['granularity'] ?? 'month';
-$source = $filters['source'] ?? 'all';
 
-$rows = apply_sales_filters(storage_load_table('sales_unified'), $filters);
+$rows = load_filtered_sales($filters);
+$ops1c = load_filtered_operations_1c($filters);
+$dealsBx = load_filtered_deals_bitrix($filters);
 $summary = summarize_sales($rows);
-
-$ops1c = apply_operations_1c_filters(storage_load_table('operations_1c'), $filters);
-$dealsBx = apply_deals_bitrix_filters(storage_load_table('deals_bitrix'), $filters);
-$opsTotal = count($ops1c);
-$dealsTotal = count($dealsBx);
-$opsRefunds = 0;
-foreach ($ops1c as $row) {
-    if ((float) ($row['sales_amount'] ?? 0) < 0) {
-        $opsRefunds++;
-    }
-}
-$dealsSuccess = 0;
-foreach ($dealsBx as $row) {
-    if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-        $dealsSuccess++;
-    }
-}
-
-$dealsCount = '—';
-$dealsSub = '1С и Битрикс';
-$extraTitle = 'Доля 1С / Битрикс';
-$extraValue = '—';
-$extraSub = 'по сумме продаж';
-
-if ($source === '1c') {
-    $dealsCount = format_count($opsTotal);
-    $dealsSub = 'операции 1С';
-    $extraTitle = 'Доля возвратов';
-    $extraValue = format_pct($opsTotal ? $opsRefunds / $opsTotal * 100 : null);
-    $extraSub = 'от всех операций';
-} elseif ($source === 'bitrix') {
-    $dealsCount = format_count($dealsTotal);
-    $dealsSub = 'создано сделок';
-    $extraTitle = 'Конверсия';
-    $extraValue = format_pct($dealsTotal ? $dealsSuccess / $dealsTotal * 100 : null);
-    $extraSub = 'успех / создано';
-} else {
-    $dealsCount = '1С: ' . format_count($opsTotal) . ' · Битрикс: ' . format_count($dealsTotal);
-    $dealsSub = 'операции 1С · сделки Битрикс';
-    $extraValue = ($summary['share_1c_pct'] !== null)
-        ? format_pct($summary['share_1c_pct']) . ' / ' . format_pct($summary['share_bitrix_pct'])
-        : '—';
-}
 
 json_response([
     'ok' => true,
-    'kpi' => [
-        'sales_total' => format_rub($summary['sales_total']),
-        'profit_total' => format_rub($summary['profit_total']),
-        'margin' => format_pct($summary['margin_pct']),
-        'deals_count' => $dealsCount,
-        'deals_sub' => $dealsSub,
-        'extra_title' => $extraTitle,
-        'extra_value' => $extraValue,
-        'extra_sub' => $extraSub,
-        'avg_check' => format_rub($summary['avg_check']),
-    ],
+    'kpi' => build_kpi_payload($rows, $ops1c, $dealsBx, $filters),
     'trend' => trend_series($rows, $granularity),
     'by_source' => [
         ['label' => '1С', 'sales' => $summary['sales_1c'], 'count' => $summary['count_1c']],

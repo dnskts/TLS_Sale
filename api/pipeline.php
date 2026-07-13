@@ -67,6 +67,8 @@ try {
     ];
     storage_save_meta($meta);
     save_filter_options_cache(build_filter_options($unified, $settings), $meta['loaded_at']);
+    require_lib('aggregates.php');
+    build_and_save_aggregates($unified, $ops, $deals, $settings, $meta['loaded_at']);
 
     json_response(['ok' => true, 'meta' => $meta]);
 } catch (Throwable $e) {

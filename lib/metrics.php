@@ -7,6 +7,22 @@
 
 declare(strict_types=1);
 
+/** Вес строки для rollup-бакетов (иначе 1). */
+function row_weight(array $row): int
+{
+    return isset($row['rollup_n']) ? max(1, (int) $row['rollup_n']) : 1;
+}
+
+/** Суммарное число записей с учётом rollup_n. */
+function rows_total_weight(array $rows): int
+{
+    $total = 0;
+    foreach ($rows as $row) {
+        $total += row_weight($row);
+    }
+    return $total;
+}
+
 /** Сводка по sales_unified. */
 function summarize_sales(array $rows): array
 {
@@ -19,25 +35,26 @@ function summarize_sales(array $rows): array
     $refundSum = 0.0;
     $refundCount = 0;
 
+    $rowCount = 0;
     foreach ($rows as $row) {
+        $w = row_weight($row);
         $sales = (float) ($row['sales_amount'] ?? 0);
         $profit = (float) ($row['profit_ex_vat'] ?? 0);
         $salesTotal += $sales;
         $profitTotal += $profit;
+        $rowCount += $w;
         if (($row['source'] ?? '') === '1c') {
             $sales1c += $sales;
-            $count1c++;
+            $count1c += $w;
             if ($sales < 0) {
                 $refundSum += $sales;
-                $refundCount++;
+                $refundCount += $w;
             }
         } elseif (($row['source'] ?? '') === 'bitrix') {
             $salesBitrix += $sales;
-            $countBitrix++;
+            $countBitrix += $w;
         }
     }
-
-    $rowCount = count($rows);
 
     return [
         'sales_total' => $salesTotal,
@@ -106,9 +123,10 @@ function group_by_dimension(array $rows, string $field, int $topN = 15): array
         if (!isset($groups[$key])) {
             $groups[$key] = ['label' => $key, 'sales' => 0.0, 'profit' => 0.0, 'count' => 0];
         }
+        $w = row_weight($row);
         $groups[$key]['sales'] += (float) ($row['sales_amount'] ?? 0);
         $groups[$key]['profit'] += (float) ($row['profit_ex_vat'] ?? 0);
-        $groups[$key]['count']++;
+        $groups[$key]['count'] += $w;
     }
     usort($groups, fn($a, $b) => $b['profit'] <=> $a['profit']);
     return array_slice(array_values($groups), 0, $topN);
@@ -137,9 +155,10 @@ function trend_series(array $rows, string $granularity = 'day'): array
         if (!isset($buckets[$period])) {
             $buckets[$period] = ['period' => $period, 'sales' => 0.0, 'profit' => 0.0, 'count' => 0];
         }
+        $w = row_weight($row);
         $buckets[$period]['sales'] += (float) ($row['sales_amount'] ?? 0);
         $buckets[$period]['profit'] += (float) ($row['profit_ex_vat'] ?? 0);
-        $buckets[$period]['count']++;
+        $buckets[$period]['count'] += $w;
     }
     ksort($buckets);
     return array_values($buckets);
@@ -154,9 +173,10 @@ function group_by_dimension_metric(array $rows, string $field, string $metric = 
         if (!isset($groups[$key])) {
             $groups[$key] = ['label' => $key, 'sales' => 0.0, 'profit' => 0.0, 'count' => 0];
         }
+        $w = row_weight($row);
         $groups[$key]['sales'] += (float) ($row['sales_amount'] ?? 0);
         $groups[$key]['profit'] += (float) ($row['profit_ex_vat'] ?? 0);
-        $groups[$key]['count']++;
+        $groups[$key]['count'] += $w;
     }
     $list = array_values($groups);
     usort($list, function ($a, $b) use ($metric) {
@@ -222,7 +242,7 @@ function group_deals_by_field(array $rows, string $field, int $topN = 12): array
         if (!isset($groups[$key])) {
             $groups[$key] = ['label' => $key, 'count' => 0];
         }
-        $groups[$key]['count']++;
+        $groups[$key]['count'] += row_weight($row);
     }
     $list = array_values($groups);
     usort($list, fn($a, $b) => $b['count'] <=> $a['count']);
@@ -235,7 +255,7 @@ function group_deals_by_funnel(array $rows): array
     $groups = ['Успех' => 0, 'Отказ' => 0, 'В процессе' => 0];
     foreach ($rows as $row) {
         $g = deal_appeal_funnel_group($row['deal_result'] ?? null);
-        $groups[$g]++;
+        $groups[$g] += row_weight($row);
     }
     $out = [];
     foreach ($groups as $label => $count) {
@@ -270,7 +290,7 @@ function deals_count_trend(array $rows, string $granularity = 'month'): array
         if (!isset($buckets[$period])) {
             $buckets[$period] = ['period' => $period, 'count' => 0];
         }
-        $buckets[$period]['count']++;
+        $buckets[$period]['count'] += row_weight($row);
     }
     ksort($buckets);
     return array_values($buckets);

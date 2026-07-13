@@ -5,30 +5,30 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
-require_lib('storage.php');
-require_lib('filters.php');
+require_lib('aggregates.php');
 require_lib('metrics.php');
 
 $filters = read_json_body() ?: $_GET;
 $granularity = $filters['granularity'] ?? 'month';
 
-$ops = apply_operations_1c_filters(storage_load_table('operations_1c'), $filters);
-$deals = apply_deals_bitrix_filters(storage_load_table('deals_bitrix'), $filters);
+$ops = load_filtered_operations_1c($filters);
+$deals = load_filtered_deals_bitrix($filters);
 
-$opsTotal = count($ops);
+$opsTotal = rows_total_weight($ops);
 $opsRefunds = 0;
 $opsProfit = 0.0;
 foreach ($ops as $row) {
+    $w = row_weight($row);
     $opsProfit += (float) ($row['profit_ex_vat'] ?? 0);
     if ((float) ($row['sales_amount'] ?? 0) < 0) {
-        $opsRefunds++;
+        $opsRefunds += $w;
     }
 }
-$dealsTotal = count($deals);
+$dealsTotal = rows_total_weight($deals);
 $dealsSuccess = 0;
 foreach ($deals as $row) {
     if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-        $dealsSuccess++;
+        $dealsSuccess += row_weight($row);
     }
 }
 
@@ -39,7 +39,7 @@ foreach ($ops as $row) {
         continue;
     }
     $b = period_key($day, $granularity);
-    $opsTrend[$b] = ($opsTrend[$b] ?? 0) + 1;
+    $opsTrend[$b] = ($opsTrend[$b] ?? 0) + row_weight($row);
 }
 $dealsTrend = [];
 foreach ($deals as $row) {
@@ -48,7 +48,7 @@ foreach ($deals as $row) {
         continue;
     }
     $b = period_key($day, $granularity);
-    $dealsTrend[$b] = ($dealsTrend[$b] ?? 0) + 1;
+    $dealsTrend[$b] = ($dealsTrend[$b] ?? 0) + row_weight($row);
 }
 $periods = array_unique(array_merge(array_keys($opsTrend), array_keys($dealsTrend)));
 sort($periods);

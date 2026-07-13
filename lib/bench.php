@@ -12,6 +12,8 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/filters.php';
 require_once __DIR__ . '/metrics.php';
 require_once __DIR__ . '/insights.php';
+require_once __DIR__ . '/aggregates.php';
+require_once __DIR__ . '/kpi.php';
 
 /** Токен для install/bench.php (первые 16 символов settings_auth_token). */
 function bench_access_token(): string
@@ -199,32 +201,59 @@ final class BenchRunner
         return $out;
     }
 
+    /** @return list<array> */
+    private function loadSalesFiltered(array $filters): array
+    {
+        if (aggregates_manifest_valid()) {
+            $rollup = load_sales_rollup_rows();
+            $this->loadCounts['sales_rollup'] = ($this->loadCounts['sales_rollup'] ?? 0) + 1;
+            return apply_sales_filters(sales_rollup_to_rows($rollup ?? []), $filters);
+        }
+        return apply_sales_filters($this->trackedLoad('sales_unified'), $filters);
+    }
+
+    /** @return list<array> */
+    private function loadOpsFiltered(array $filters): array
+    {
+        if (aggregates_manifest_valid()) {
+            $rollup = load_ops_rollup_rows();
+            $this->loadCounts['ops_rollup'] = ($this->loadCounts['ops_rollup'] ?? 0) + 1;
+            return apply_operations_1c_filters_on_enriched(ops_rollup_to_rows($rollup ?? []), $filters);
+        }
+        return apply_operations_1c_filters($this->trackedLoad('operations_1c'), $filters);
+    }
+
+    /** @return list<array> */
+    private function loadDealsFiltered(array $filters): array
+    {
+        if (aggregates_manifest_valid()) {
+            $rollup = load_deals_rollup_rows();
+            $this->loadCounts['deals_rollup'] = ($this->loadCounts['deals_rollup'] ?? 0) + 1;
+            return apply_deals_bitrix_filters_on_enriched(deals_rollup_to_rows($rollup ?? []), $filters);
+        }
+        return apply_deals_bitrix_filters($this->trackedLoad('deals_bitrix'), $filters);
+    }
+
+    /** @return int rows processed */
+    private function runKpi(): int
+    {
+        $filters = $this->filters;
+        $rows = $this->loadSalesFiltered($filters);
+        $ops1c = $this->loadOpsFiltered($filters);
+        $dealsBx = $this->loadDealsFiltered($filters);
+        build_kpi_payload($rows, $ops1c, $dealsBx, $filters);
+        return rows_total_weight($rows) + rows_total_weight($ops1c) + rows_total_weight($dealsBx);
+    }
+
     /** @return int rows processed */
     private function runOverview(): int
     {
         $filters = $this->filters;
         $granularity = $filters['granularity'] ?? 'month';
-        $source = $filters['source'] ?? 'all';
 
-        $rows = apply_sales_filters($this->trackedLoad('sales_unified'), $filters);
-        $summary = summarize_sales($rows);
-        $ops1c = apply_operations_1c_filters($this->trackedLoad('operations_1c'), $filters);
-        $dealsBx = apply_deals_bitrix_filters($this->trackedLoad('deals_bitrix'), $filters);
-
-        $opsTotal = count($ops1c);
-        $dealsTotal = count($dealsBx);
-        $opsRefunds = 0;
-        foreach ($ops1c as $row) {
-            if ((float) ($row['sales_amount'] ?? 0) < 0) {
-                $opsRefunds++;
-            }
-        }
-        $dealsSuccess = 0;
-        foreach ($dealsBx as $row) {
-            if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-                $dealsSuccess++;
-            }
-        }
+        $rows = $this->loadSalesFiltered($filters);
+        $ops1c = $this->loadOpsFiltered($filters);
+        $dealsBx = $this->loadDealsFiltered($filters);
 
         trend_series($rows, $granularity);
         group_by_dimension_metric($rows, 'agent_team', 'sales', 8);
@@ -232,8 +261,9 @@ final class BenchRunner
         group_deals_by_funnel($dealsBx);
         deals_count_trend($dealsBx, $granularity);
         top_clients_by_sales($rows, 10);
+        build_kpi_payload($rows, $ops1c, $dealsBx, $filters);
 
-        return count($rows) + $opsTotal + $dealsTotal;
+        return rows_total_weight($rows) + rows_total_weight($ops1c) + rows_total_weight($dealsBx);
     }
 
     /** @return int */
@@ -274,16 +304,8 @@ final class BenchRunner
     /** @return int */
     private function runAgents(): int
     {
-        $rows = apply_sales_filters($this->trackedLoad('sales_unified'), $this->filters);
-        $teams = [];
-        foreach ($rows as $row) {
-            $team = $row['agent_team'] ?? 'Без команды';
-            if (!isset($teams[$team])) {
-                $teams[$team] = 0;
-            }
-            $teams[$team]++;
-        }
-        return count($rows);
+        $rows = $this->loadSalesFiltered($this->filters);
+        return rows_total_weight($rows);
     }
 
     /** @return int */
@@ -299,8 +321,8 @@ final class BenchRunner
     {
         $filters = $this->filters;
         $granularity = $filters['granularity'] ?? 'month';
-        $ops = apply_operations_1c_filters($this->trackedLoad('operations_1c'), $filters);
-        $deals = apply_deals_bitrix_filters($this->trackedLoad('deals_bitrix'), $filters);
+        $ops = $this->loadOpsFiltered($filters);
+        $deals = $this->loadDealsFiltered($filters);
         foreach ($ops as $row) {
             $day = $row['date_operation'] ?? null;
             if ($day) {
@@ -313,7 +335,7 @@ final class BenchRunner
                 period_key($day, $granularity);
             }
         }
-        return count($ops) + count($deals);
+        return rows_total_weight($ops) + rows_total_weight($deals);
     }
 
     /** @return int */
@@ -332,12 +354,18 @@ final class BenchRunner
             ['id' => 'filters', 'label' => 'filters.php', 'desc' => 'Списки фильтров при загрузке страницы', 'fn' => function () {
                 return $this->runFilters();
             }],
-            ['id' => 'overview', 'label' => 'overview.php', 'desc' => 'Вкладка «Обзор» / KPI', 'fn' => function () {
+            ['id' => 'kpi', 'label' => 'kpi.php', 'desc' => 'KPI-полоска (не вкладка Обзор)', 'fn' => function () {
+                return $this->runKpi();
+            }],
+            ['id' => 'overview', 'label' => 'overview.php', 'desc' => 'Вкладка «Обзор»', 'fn' => function () {
                 return $this->runOverview();
             }],
-            ['id' => 'overview_x2', 'label' => 'overview.php ×2', 'desc' => 'Как в UI: refreshKpi + TabOverview', 'fn' => function () {
-                $this->runOverview();
+            ['id' => 'overview_ui', 'label' => 'kpi + overview', 'desc' => 'Как в UI на вкладке Обзор: один overview (KPI внутри)', 'fn' => function () {
                 return $this->runOverview();
+            }],
+            ['id' => 'tab_other', 'label' => 'kpi + agents', 'desc' => 'Переход на другую вкладку: KPI + вкладка', 'fn' => function () {
+                $this->runKpi();
+                return $this->runAgents();
             }],
             ['id' => 'insights', 'label' => 'insights.php', 'desc' => 'Советы руководителю', 'fn' => function () {
                 return $this->runInsights();
@@ -403,15 +431,15 @@ final class BenchRunner
         if ($backend === 'json') {
             $tips[] = 'Хранилище JSON: каждый API-запрос читает целые файлы. Включите pdo_sqlite на сервере или добавьте кэш/предрасчёт.';
         }
-        if (isset($byId['overview']) && $byId['overview']['ms'] > 2000) {
-            $tips[] = 'overview.php медленнее 2 с — оптимизируйте загрузку таблиц или предрасчитывайте агрегаты при pipeline.';
+        if (aggregates_manifest_valid()) {
+            $tips[] = 'Rollup-агрегаты актуальны (data/aggregates/) — API читают компактные файлы вместо полных таблиц.';
+        } elseif (isset($byId['overview']) && $byId['overview']['ms'] > 2000) {
+            $tips[] = 'overview.php медленнее 2 с — запустите «Обновить данные» для пересборки rollup-агрегатов.';
         }
-        if (isset($byId['overview'], $byId['overview_x2'])) {
-            $ratio = $byId['overview']['ms'] > 0
-                ? $byId['overview_x2']['ms'] / $byId['overview']['ms']
-                : 0;
-            if ($ratio > 1.7) {
-                $tips[] = 'overview вызывается дважды (KPI + вкладка) — объедините запросы в app.js для ~2× ускорения «Обзора».';
+        if (isset($byId['tab_other'], $byId['kpi'])) {
+            $combined = ($byId['kpi']['ms'] ?? 0) + ($byId['agents']['ms'] ?? 0);
+            if ($combined > 0 && isset($byId['overview']) && $byId['overview']['ms'] > $combined * 1.5) {
+                $tips[] = 'На не-overview вкладках используется kpi.php — быстрее полного overview.';
             }
         }
         if (isset($byId['insights']) && ($byId['insights']['load_total'] ?? 0) >= 4) {
@@ -457,14 +485,14 @@ function compute_insights_payload_with_loader(array $filters, callable $loader):
     $unknownRows = 0;
     foreach ($rows as $row) {
         if (str_starts_with((string) ($row['agent_key'] ?? ''), 'unknown:')) {
-            $unknownRows++;
+            $unknownRows += row_weight($row);
         }
     }
 
     $dealsSuccess = 0;
     foreach ($deals as $row) {
         if (clean_str($row['deal_result'] ?? null) === 'Успех') {
-            $dealsSuccess++;
+            $dealsSuccess += row_weight($row);
         }
     }
 
@@ -474,7 +502,7 @@ function compute_insights_payload_with_loader(array $filters, callable $loader):
         'summary' => $summary,
         'prev_summary' => $prevSummary,
         'refund' => $refund,
-        'deals_total' => count($deals),
+        'deals_total' => rows_total_weight($deals),
         'deals_success' => $dealsSuccess,
         'concentration' => $concentration,
         'unknown_agent_rows' => $unknownRows,

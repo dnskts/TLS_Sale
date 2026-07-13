@@ -13,6 +13,7 @@ require_lib('parse_bitrix.php');
 require_lib('build_unified.php');
 require_lib('input_files.php');
 require_lib('filter_options.php');
+require_lib('aggregates.php');
 
 @set_time_limit(300);
 @ini_set('memory_limit', '512M');
@@ -57,4 +58,5 @@ storage_save_meta([
     'warnings' => [],
 ]);
 save_filter_options_cache(build_filter_options($unified, $settings), $loadedAt);
+build_and_save_aggregates($unified, $ops, $deals, $settings, $loadedAt);
 echo "OK backend=" . storage_backend() . "\n";

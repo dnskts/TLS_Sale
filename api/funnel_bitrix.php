@@ -5,15 +5,14 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
-require_lib('storage.php');
-require_lib('filters.php');
+require_lib('aggregates.php');
 require_lib('metrics.php');
 
 $filters = read_json_body() ?: $_GET;
 $granularity = $filters['granularity'] ?? 'month';
-$rows = apply_deals_bitrix_filters(storage_load_table('deals_bitrix'), $filters);
+$rows = load_filtered_deals_bitrix($filters);
 
-$total = count($rows);
+$total = rows_total_weight($rows);
 $success = 0;
 $withPaid = 0;
 $paidInPeriod = 0;
@@ -27,16 +26,17 @@ $dateFrom = $filters['date_from'] ?? null;
 $dateTo = $filters['date_to'] ?? null;
 
 foreach ($rows as $row) {
+    $w = row_weight($row);
     $result = clean_str($row['deal_result'] ?? null) ?? 'Не указан';
-    $results[$result] = ($results[$result] ?? 0) + 1;
+    $results[$result] = ($results[$result] ?? 0) + $w;
     if ($result === 'Успех') {
-        $success++;
+        $success += $w;
     }
     $status = clean_str($row['deal_status'] ?? null) ?? 'Не указан';
-    $statuses[$status] = ($statuses[$status] ?? 0) + 1;
+    $statuses[$status] = ($statuses[$status] ?? 0) + $w;
 
     if (!empty($row['client_paid_at'])) {
-        $withPaid++;
+        $withPaid += $w;
         $paidDay = substr((string) $row['client_paid_at'], 0, 10);
         $ok = true;
         if ($dateFrom && $paidDay < $dateFrom) {
@@ -46,19 +46,19 @@ foreach ($rows as $row) {
             $ok = false;
         }
         if ($ok) {
-            $paidInPeriod++;
+            $paidInPeriod += $w;
         }
         $bucket = period_key($paidDay, $granularity);
-        $paidTrend[$bucket] = ($paidTrend[$bucket] ?? 0) + 1;
+        $paidTrend[$bucket] = ($paidTrend[$bucket] ?? 0) + $w;
     }
     if ($result === 'Проиграна') {
         $reason = clean_str($row['lost_deal_reason'] ?? null) ?? 'Не указана';
-        $lost[$reason] = ($lost[$reason] ?? 0) + 1;
+        $lost[$reason] = ($lost[$reason] ?? 0) + $w;
     }
     $createdDay = !empty($row['deal_created_at']) ? substr((string) $row['deal_created_at'], 0, 10) : null;
     if ($createdDay) {
         $bucket = period_key($createdDay, $granularity);
-        $createdTrend[$bucket] = ($createdTrend[$bucket] ?? 0) + 1;
+        $createdTrend[$bucket] = ($createdTrend[$bucket] ?? 0) + $w;
     }
 }
 

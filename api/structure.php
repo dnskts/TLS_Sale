@@ -5,12 +5,11 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
-require_lib('storage.php');
-require_lib('filters.php');
+require_lib('aggregates.php');
 require_lib('metrics.php');
 
 $filters = read_json_body() ?: $_GET;
-$rows = apply_sales_filters(storage_load_table('sales_unified'), $filters);
+$rows = load_filtered_sales($filters);
 
 json_response([
     'ok' => true,

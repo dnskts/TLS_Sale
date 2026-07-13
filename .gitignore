@@ -9,6 +9,7 @@ Thumbs.db
 data/dashboard.db
 data/last_load.json
 data/filter_options.json
+data/aggregates/
 data/backups/
 data/tables/
 settings.json.tmp
