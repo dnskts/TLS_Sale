@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/parse_1c.php';
-require_once __DIR__ . '/parse_bitrix.php';
+require_once __DIR__ . '/bitrix_export.php';
 
 /** @return list<array{index:int,field:string,label:string,note:string}> */
 function parser_spec_one_c(): array
@@ -83,21 +83,36 @@ function parser_spec_one_c(): array
 function parser_spec_bitrix(): array
 {
     $notes = [
-        'deal_no' => 'raw_id в unified',
-        'responsible_person' => 'Сопоставление с settings.json → names_bitrix',
-        'client_paid_at' => 'Основная дата продажи',
-        'deal_created_at' => 'Fallback, если нет даты оплаты (date_fallback_used)',
-        'deal_result' => 'В unified попадают только «Успех» (success_deal_result из settings)',
-        'sales_amount' => 'Сумма продажи в unified',
+        'deal_no' => 'export: колонка ID',
+        'responsible_person' => 'export: Ответственный → names_bitrix',
+        'client_paid_at' => 'В export нет; date_for_sales из Дата создания (fallback)',
+        'deal_created_at' => 'export: Дата создания',
+        'deal_result' => 'В unified только «Успех»',
+        'sales_amount' => 'Формула: Всего к оплате Клиентом',
+        'profit_ex_vat' => 'Формула: Комиссия + Сервисный сбор',
+        'service_fee' => 'export: Сервисный сбор',
     ];
     $out = [];
-    foreach (bitrix_header_aliases() as $header => $field) {
+    foreach (bitrix_export_header_aliases() as $header => $field) {
+        if (str_starts_with($field, '_')) {
+            continue;
+        }
         $out[] = [
             'header' => $header,
             'field' => $field,
             'note' => $notes[$field] ?? '',
         ];
     }
+    $out[] = [
+        'header' => 'Всего к оплате Клиентом',
+        'field' => 'sales_amount',
+        'note' => 'Источник для sales_amount (не alias, вычисляется)',
+    ];
+    $out[] = [
+        'header' => 'Комиссия + Сервисный сбор',
+        'field' => 'profit_ex_vat',
+        'note' => 'Источник для profit_ex_vat (вычисляется)',
+    ];
     return $out;
 }
 

@@ -27,6 +27,22 @@
     el.style.color = isError ? '#991b1b' : '#535c69';
   }
 
+  function setPipelineLoading(on) {
+    var btn = document.getElementById('btn-refresh-data');
+    var banner = document.querySelector('.status-banner');
+    if (btn) {
+      btn.classList.toggle('is-loading', !!on);
+      btn.disabled = !!on;
+    }
+    if (banner) {
+      banner.classList.toggle('is-loading', !!on);
+    }
+    document.querySelectorAll('#btn-apply-pipeline').forEach(function (b) {
+      b.classList.toggle('is-loading', !!on);
+      b.disabled = !!on;
+    });
+  }
+
   function msValues(key) {
     return multiSelects[key] ? multiSelects[key].getValues() : [];
   }
@@ -402,15 +418,17 @@
   initDateInputs();
 
   document.getElementById('btn-refresh-data').addEventListener('click', async function () {
+    setPipelineLoading(true);
     msg('Идёт пересборка данных из Excel (может занять минуту)…');
     try {
       var data = await api('api/pipeline.php', {});
       msg('Данные обновлены: Unified ' + (data.meta.counts.sales_unified || 0));
       await loadFilterOptions();
       await applyAll();
-      location.reload();
     } catch (e) {
       msg(e.message, true);
+    } finally {
+      setPipelineLoading(false);
     }
   });
 
@@ -424,4 +442,5 @@
   window.AppState = state;
   window.AppGoToDetails = goToDetails;
   window.AppClearDrill = clearDrill;
+  window.AppSetPipelineLoading = setPipelineLoading;
 })();

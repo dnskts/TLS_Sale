@@ -148,6 +148,50 @@ function xlsx_read_sheet(string $path, string $sheetName): array
     return array_values($rows);
 }
 
+/**
+ * Имена листов в xlsx.
+ *
+ * @return list<string>
+ */
+function xlsx_list_sheet_names(string $path): array
+{
+    if (!is_readable($path)) {
+        return [];
+    }
+    $zip = new ZipArchive();
+    if ($zip->open($path) !== true) {
+        return [];
+    }
+    $wbXml = $zip->getFromName('xl/workbook.xml');
+    $zip->close();
+    if ($wbXml === false) {
+        return [];
+    }
+    $wb = @simplexml_load_string($wbXml);
+    if ($wb === false || !isset($wb->sheets->sheet)) {
+        return [];
+    }
+    $names = [];
+    foreach ($wb->sheets->sheet as $sheet) {
+        $names[] = (string) $sheet['name'];
+    }
+    return $names;
+}
+
+/**
+ * Первые N строк листа (для детекта формата без полной загрузки).
+ *
+ * @return list<list<mixed>>
+ */
+function xlsx_read_first_rows(string $path, string $sheetName, int $maxRows = 2): array
+{
+    if ($maxRows < 1) {
+        return [];
+    }
+    $all = xlsx_read_sheet($path, $sheetName);
+    return array_slice($all, 0, $maxRows);
+}
+
 /** Буква колонки из ссылки A12 → индекс 0, B12 → 1, AA1 → 26 */
 function xlsx_col_index(string $cellRef): int
 {

@@ -931,11 +931,19 @@ window.SettingsEditor = (function () {
 
   Editor.prototype.applyPipeline = function () {
     var self = this;
+    if (window.AppSetPipelineLoading) {
+      window.AppSetPipelineLoading(true);
+    }
     this.ctx.api('api/pipeline.php', {})
       .then(function (p) {
         self.showMsg('Данные пересобраны. Unified: ' + (p.meta.counts.sales_unified || 0), false);
       })
-      .catch(function (e) { self.showMsg(e.message, true); });
+      .catch(function (e) { self.showMsg(e.message, true); })
+      .finally(function () {
+        if (window.AppSetPipelineLoading) {
+          window.AppSetPipelineLoading(false);
+        }
+      });
   };
 
   return {

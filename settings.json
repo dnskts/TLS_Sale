@@ -5,14 +5,14 @@
     },
     "paths": {
         "input_dir": "input",
-        "file_1c": "1C.xlsx",
-        "file_bitrix": "Битрикс.xlsx",
+        "file_1c": "",
+        "file_bitrix": "",
         "sqlite": "data/dashboard.db",
         "last_load_meta": "data/last_load.json"
     },
     "sheets": {
         "1c": "TDSheet",
-        "bitrix": "Битрикс"
+        "bitrix": "Отчет по сделкам"
     },
     "metrics": {
         "profit_field": "profit_ex_vat",

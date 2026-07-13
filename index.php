@@ -63,7 +63,7 @@ $monthStart = date('Y-m-01');
                     </div>
                 <?php else: ?>
                     <strong>Данные не загружены</strong><br>
-                    <span>Положите xlsx в input/ и нажмите «Обновить данные»</span>
+                    <span>Положите выгрузки 1С и Битрикс (.xlsx) в input/ и нажмите «Обновить данные»</span>
                 <?php endif; ?>
             </div>
             <div class="sidebar-actions">

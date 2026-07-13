@@ -144,6 +144,55 @@ body {
   width: 100%;
 }
 
+.btn-secondary.is-loading {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+.btn-secondary.is-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.22) 45%,
+    rgba(37, 99, 235, 0.35) 50%,
+    rgba(37, 99, 235, 0.22) 55%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: btn-fill-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes btn-fill-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.status-banner.is-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-banner.is-loading::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--primary, #2563eb), transparent);
+  animation: status-fill-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes status-fill-sweep {
+  from { left: -40%; }
+  to { left: 100%; }
+}
+
 /* ── Main content ────────────────────────────────────── */
 
 .main-content {
