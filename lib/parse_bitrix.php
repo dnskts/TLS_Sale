@@ -11,7 +11,21 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/xlsx_reader.php';
+require_once __DIR__ . '/html_table_reader.php';
 require_once __DIR__ . '/settings.php';
+
+/**
+ * Прочитать строки выгрузки Битрикс: .xlsx или HTML-таблица (.xls).
+ *
+ * @return list<list<mixed>>
+ */
+function bitrix_read_raw_rows(string $path, string $sheetName): array
+{
+    if (is_html_table_export($path)) {
+        return html_table_read_rows($path);
+    }
+    return xlsx_read_sheet($path, $sheetName);
+}
 
 /** Русское название колонки в Excel → короткое имя в коде */
 function bitrix_header_aliases(): array
@@ -50,7 +64,7 @@ function bitrix_header_aliases(): array
  */
 function parse_bitrix(string $path, string $sheetName): array
 {
-    $rawRows = xlsx_read_sheet($path, $sheetName);
+    $rawRows = bitrix_read_raw_rows($path, $sheetName);
     if (count($rawRows) < 2) {
         return [];
     }

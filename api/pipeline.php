@@ -20,9 +20,10 @@ require_lib('parse_1c.php');
 require_lib('parse_bitrix.php');
 require_lib('build_unified.php');
 require_lib('auth.php');
+require_lib('input_files.php');
 
 // Мутация данных — нужна авторизация настроек (или можно ослабить для «Обновить»)
-// Оставляем открытым для кнопки «Обновить данные» в sidebar, но логируем.
+// Оставляем открытым для кнопки «Обновить данные» в sidebar.
 
 try {
     @set_time_limit(300);
@@ -30,16 +31,16 @@ try {
 
     $settings = load_settings();
     $inputDir = project_root() . DIRECTORY_SEPARATOR . ($settings['paths']['input_dir'] ?? 'input');
-    $file1c = $inputDir . DIRECTORY_SEPARATOR . ($settings['paths']['file_1c'] ?? '1C.xlsx');
-    $fileBx = $inputDir . DIRECTORY_SEPARATOR . ($settings['paths']['file_bitrix'] ?? 'Битрикс.xlsx');
+    $file1c = resolve_input_file($inputDir, $settings['paths']['file_1c'] ?? '1C.xlsx', ['1c.xlsx', '1C.XLSX']);
+    $fileBx = resolve_input_file($inputDir, $settings['paths']['file_bitrix'] ?? 'Битрикс.xlsx', ['Битрикс.xls', 'bitrix.xlsx', 'Bitrix.xlsx']);
     $sheet1c = $settings['sheets']['1c'] ?? 'TDSheet';
     $sheetBx = $settings['sheets']['bitrix'] ?? 'Битрикс';
 
-    if (!is_readable($file1c)) {
-        json_response(['ok' => false, 'error' => "Не найден файл 1С: {$file1c}"], 400);
+    if ($file1c === null) {
+        json_response(['ok' => false, 'error' => "Не найден файл 1С в {$inputDir} (ожидается 1C.xlsx)"], 400);
     }
-    if (!is_readable($fileBx)) {
-        json_response(['ok' => false, 'error' => "Не найден файл Битрикс: {$fileBx}"], 400);
+    if ($fileBx === null) {
+        json_response(['ok' => false, 'error' => "Не найден файл Битрикс в {$inputDir} (ожидается Битрикс.xlsx или Битрикс.xls)"], 400);
     }
 
     $ops = parse_1c($file1c, $sheet1c);

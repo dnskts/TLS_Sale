@@ -11,19 +11,25 @@ require_lib('storage.php');
 require_lib('parse_1c.php');
 require_lib('parse_bitrix.php');
 require_lib('build_unified.php');
+require_lib('input_files.php');
 
 @set_time_limit(300);
 @ini_set('memory_limit', '512M');
 
 $settings = load_settings();
 $inputDir = project_root() . DIRECTORY_SEPARATOR . ($settings['paths']['input_dir'] ?? 'input');
-$file1c = $inputDir . DIRECTORY_SEPARATOR . ($settings['paths']['file_1c'] ?? '1C.xlsx');
-$fileBx = $inputDir . DIRECTORY_SEPARATOR . ($settings['paths']['file_bitrix'] ?? 'Битрикс.xlsx');
+$file1c = resolve_input_file($inputDir, $settings['paths']['file_1c'] ?? '1C.xlsx', ['1c.xlsx', '1C.XLSX']);
+$fileBx = resolve_input_file($inputDir, $settings['paths']['file_bitrix'] ?? 'Битрикс.xlsx', ['Битрикс.xls', 'bitrix.xlsx', 'Bitrix.xlsx']);
+
+if ($file1c === null || $fileBx === null) {
+    fwrite(STDERR, "Не найдены файлы выгрузки в {$inputDir}\n");
+    exit(1);
+}
 
 echo "1C file: {$file1c}\n";
 echo "Bitrix file: {$fileBx}\n";
-echo "readable 1c: " . (is_readable($file1c) ? 'yes' : 'no') . "\n";
-echo "readable bx: " . (is_readable($fileBx) ? 'yes' : 'no') . "\n";
+echo "readable 1c: " . ($file1c !== null ? 'yes' : 'no') . "\n";
+echo "readable bx: " . ($fileBx !== null ? 'yes' : 'no') . "\n";
 
 $ops = parse_1c($file1c, $settings['sheets']['1c'] ?? 'TDSheet');
 echo 'operations_1c: ' . count($ops) . "\n";

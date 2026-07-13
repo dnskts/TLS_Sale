@@ -164,7 +164,13 @@
       opts.body = JSON.stringify(body || {});
     }
     var res = await fetch(url, opts);
-    var data = await res.json();
+    var rawText = await res.text();
+    var data;
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (parseErr) {
+      throw new Error('Сервер вернул не JSON (HTTP ' + res.status + ')');
+    }
     if (!res.ok || data.ok === false) {
       throw new Error(data.error || ('Ошибка HTTP ' + res.status));
     }

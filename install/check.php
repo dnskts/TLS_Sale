@@ -12,12 +12,12 @@ require_once dirname(__DIR__) . '/lib/bootstrap.php';
 require_lib('storage.php');
 
 $checks = [];
-$checks[] = ['name' => 'Версия PHP', 'ok' => version_compare(PHP_VERSION, '8.0.0', '>='), 'detail' => PHP_VERSION];
-$checks[] = ['name' => 'json', 'ok' => extension_loaded('json'), 'detail' => ''];
-$checks[] = ['name' => 'mbstring', 'ok' => extension_loaded('mbstring'), 'detail' => ''];
-$checks[] = ['name' => 'zip (для xlsx)', 'ok' => extension_loaded('zip'), 'detail' => ''];
-$checks[] = ['name' => 'pdo_sqlite', 'ok' => extension_loaded('pdo_sqlite'), 'detail' => ''];
-$checks[] = ['name' => 'pdo_mysql', 'ok' => extension_loaded('pdo_mysql'), 'detail' => ''];
+$checks[] = ['name' => 'Версия PHP (≥ 7.4)', 'ok' => version_compare(PHP_VERSION, '7.4.0', '>='), 'detail' => PHP_VERSION, 'optional' => false];
+$checks[] = ['name' => 'json', 'ok' => extension_loaded('json'), 'detail' => '', 'optional' => false];
+$checks[] = ['name' => 'mbstring', 'ok' => extension_loaded('mbstring'), 'detail' => '', 'optional' => false];
+$checks[] = ['name' => 'zip (для xlsx)', 'ok' => extension_loaded('zip'), 'detail' => '', 'optional' => false];
+$checks[] = ['name' => 'pdo_sqlite (опционально)', 'ok' => extension_loaded('pdo_sqlite'), 'detail' => 'для SQLite-хранилища', 'optional' => true];
+$checks[] = ['name' => 'pdo_mysql (опционально)', 'ok' => extension_loaded('pdo_mysql'), 'detail' => 'резерв на будущее', 'optional' => true];
 
 $dataDir = project_root() . DIRECTORY_SEPARATOR . 'data';
 $inputDir = project_root() . DIRECTORY_SEPARATOR . 'input';
@@ -27,8 +27,8 @@ if (!is_dir($dataDir)) {
 if (!is_dir($inputDir)) {
     @mkdir($inputDir, 0775, true);
 }
-$checks[] = ['name' => 'Папка data/ writable', 'ok' => is_writable($dataDir), 'detail' => $dataDir];
-$checks[] = ['name' => 'Папка input/ writable', 'ok' => is_writable($inputDir), 'detail' => $inputDir];
+$checks[] = ['name' => 'Папка data/ writable', 'ok' => is_writable($dataDir), 'detail' => $dataDir, 'optional' => false];
+$checks[] = ['name' => 'Папка input/ writable', 'ok' => is_writable($inputDir), 'detail' => $inputDir, 'optional' => false];
 
 $backend = storage_backend();
 ?><!DOCTYPE html>
@@ -41,6 +41,7 @@ $backend = storage_backend();
         h1 { color: #2067b0; }
         .ok { color: #4a6b1f; }
         .bad { color: #991b1b; }
+        .opt { color: #7a6a2a; }
         table { width: 100%; border-collapse: collapse; }
         td, th { border-bottom: 1px solid #e6e9ec; padding: 8px; text-align: left; }
         .box { background: #eef2f4; padding: 12px 16px; border-radius: 6px; margin-top: 20px; }
@@ -51,10 +52,22 @@ $backend = storage_backend();
 <p>Эта страница помогает понять, запустится ли дашборд на сервере Битрикс24.</p>
 <table>
     <tr><th>Проверка</th><th>Статус</th><th>Детали</th></tr>
-    <?php foreach ($checks as $c): ?>
+    <?php foreach ($checks as $c):
+        $optional = !empty($c['optional']);
+        if ($c['ok']) {
+            $statusClass = 'ok';
+            $statusText = 'OK';
+        } elseif ($optional) {
+            $statusClass = 'opt';
+            $statusText = '—';
+        } else {
+            $statusClass = 'bad';
+            $statusText = 'НЕТ';
+        }
+    ?>
         <tr>
             <td><?= htmlspecialchars($c['name']) ?></td>
-            <td class="<?= $c['ok'] ? 'ok' : 'bad' ?>"><?= $c['ok'] ? 'OK' : 'НЕТ' ?></td>
+            <td class="<?= $statusClass ?>"><?= $statusText ?></td>
             <td><?= htmlspecialchars((string) $c['detail']) ?></td>
         </tr>
     <?php endforeach; ?>
