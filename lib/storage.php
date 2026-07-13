@@ -64,6 +64,24 @@ function storage_pdo(): PDO
     return $pdo;
 }
 
+/** @return array<string, list<array>> */
+function &storage_table_cache(): array
+{
+    static $cache = [];
+    return $cache;
+}
+
+/** Сбросить in-request кэш таблиц (после сохранения). */
+function storage_clear_table_cache(?string $table = null): void
+{
+    $cache = &storage_table_cache();
+    if ($table === null) {
+        $cache = [];
+        return;
+    }
+    unset($cache[$table]);
+}
+
 /**
  * Сохранить таблицу (массив ассоциативных строк).
  * Старые данные этой таблицы полностью заменяются.
@@ -72,6 +90,7 @@ function storage_save_table(string $table, array $rows): void
 {
     if (storage_backend() === 'sqlite') {
         storage_sqlite_save($table, $rows);
+        storage_clear_table_cache($table);
         return;
     }
     $path = project_root() . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'tables' . DIRECTORY_SEPARATOR . $table . '.json';
@@ -84,20 +103,28 @@ function storage_save_table(string $table, array $rows): void
         throw new RuntimeException("Не удалось сохранить таблицу {$table}");
     }
     file_put_contents($path, $json);
+    storage_clear_table_cache($table);
 }
 
 /** Загрузить таблицу как массив строк. */
 function storage_load_table(string $table): array
 {
+    $cache = &storage_table_cache();
+    if (array_key_exists($table, $cache)) {
+        return $cache[$table];
+    }
     if (storage_backend() === 'sqlite') {
-        return storage_sqlite_load($table);
+        $cache[$table] = storage_sqlite_load($table);
+        return $cache[$table];
     }
     $path = project_root() . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'tables' . DIRECTORY_SEPARATOR . $table . '.json';
     if (!is_readable($path)) {
-        return [];
+        $cache[$table] = [];
+        return $cache[$table];
     }
     $data = json_decode((string) file_get_contents($path), true);
-    return is_array($data) ? $data : [];
+    $cache[$table] = is_array($data) ? $data : [];
+    return $cache[$table];
 }
 
 function storage_sqlite_save(string $table, array $rows): void
@@ -155,16 +182,36 @@ function storage_save_meta(array $meta): void
         $path,
         json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
     );
+    storage_clear_meta_cache();
+}
+
+function storage_clear_meta_cache(): void
+{
+    $cache = &storage_meta_cache_ref();
+    $cache = null;
+}
+
+/** @return array<string, mixed>|null */
+function &storage_meta_cache_ref(): ?array
+{
+    static $cache = null;
+    return $cache;
 }
 
 function storage_load_meta(): array
 {
+    $cache = &storage_meta_cache_ref();
+    if (is_array($cache)) {
+        return $cache;
+    }
     $settings = load_settings();
     $rel = $settings['paths']['last_load_meta'] ?? 'data/last_load.json';
     $path = project_root() . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $rel);
     if (!is_readable($path)) {
-        return [];
+        $cache = [];
+        return $cache;
     }
     $data = json_decode((string) file_get_contents($path), true);
-    return is_array($data) ? $data : [];
+    $cache = is_array($data) ? $data : [];
+    return $cache;
 }

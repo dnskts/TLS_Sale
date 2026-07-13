@@ -21,6 +21,7 @@ require_lib('parse_bitrix.php');
 require_lib('build_unified.php');
 require_lib('auth.php');
 require_lib('input_files.php');
+require_lib('filter_options.php');
 
 // Мутация данных — нужна авторизация настроек (или можно ослабить для «Обновить»)
 // Оставляем открытым для кнопки «Обновить данные» в sidebar.
@@ -65,6 +66,7 @@ try {
         'warnings' => [],
     ];
     storage_save_meta($meta);
+    save_filter_options_cache(build_filter_options($unified, $settings), $meta['loaded_at']);
 
     json_response(['ok' => true, 'meta' => $meta]);
 } catch (Throwable $e) {

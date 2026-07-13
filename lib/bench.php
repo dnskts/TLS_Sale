@@ -435,12 +435,13 @@ final class BenchRunner
  */
 function compute_insights_payload_with_loader(array $filters, callable $loader): array
 {
-    $rows = apply_sales_filters($loader('sales_unified'), $filters);
+    $allSales = $loader('sales_unified');
+    $rows = apply_sales_filters($allSales, $filters);
     $deals = apply_deals_bitrix_filters($loader('deals_bitrix'), $filters);
     $ops = apply_operations_1c_filters($loader('operations_1c'), $filters);
 
     $prevFilters = filters_for_previous_period($filters);
-    $prevRows = apply_sales_filters($loader('sales_unified'), $prevFilters);
+    $prevRows = apply_sales_filters($allSales, $prevFilters);
 
     $summary = summarize_sales($rows);
     $prevSummary = summarize_sales($prevRows);

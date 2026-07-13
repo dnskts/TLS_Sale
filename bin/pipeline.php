@@ -12,6 +12,7 @@ require_lib('parse_1c.php');
 require_lib('parse_bitrix.php');
 require_lib('build_unified.php');
 require_lib('input_files.php');
+require_lib('filter_options.php');
 
 @set_time_limit(300);
 @ini_set('memory_limit', '512M');
@@ -43,8 +44,9 @@ storage_save_table('operations_1c', $ops);
 storage_save_table('deals_bitrix', $deals);
 storage_save_table('sales_unified', $unified);
 storage_save_table('agents_dim', $agentsDim);
+$loadedAt = date('c');
 storage_save_meta([
-    'loaded_at' => date('c'),
+    'loaded_at' => $loadedAt,
     'backend' => storage_backend(),
     'counts' => [
         'operations_1c' => count($ops),
@@ -54,4 +56,5 @@ storage_save_meta([
     ],
     'warnings' => [],
 ]);
+save_filter_options_cache(build_filter_options($unified, $settings), $loadedAt);
 echo "OK backend=" . storage_backend() . "\n";

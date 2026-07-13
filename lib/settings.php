@@ -20,9 +20,20 @@ function settings_path(): string
     return project_root() . DIRECTORY_SEPARATOR . 'settings.json';
 }
 
+/** @return array<string, mixed>|null */
+function &settings_cache_ref(): ?array
+{
+    static $cache = null;
+    return $cache;
+}
+
 /** Прочитать весь settings.json в массив. */
 function load_settings(): array
 {
+    $cache = &settings_cache_ref();
+    if (is_array($cache)) {
+        return $cache;
+    }
     $path = settings_path();
     if (!is_readable($path)) {
         throw new RuntimeException('Не найден settings.json в корне проекта');
@@ -31,7 +42,14 @@ function load_settings(): array
     if (!is_array($data)) {
         throw new RuntimeException('settings.json повреждён (не JSON)');
     }
-    return $data;
+    $cache = $data;
+    return $cache;
+}
+
+function clear_settings_cache(): void
+{
+    $cache = &settings_cache_ref();
+    $cache = null;
 }
 
 /**
@@ -52,6 +70,7 @@ function save_settings(array $data): void
     if (!rename($tmp, $path)) {
         throw new RuntimeException('Не удалось заменить settings.json');
     }
+    clear_settings_cache();
 }
 
 /** Сделать копию settings.json в data/backups/ перед важными изменениями. */

@@ -13,6 +13,7 @@
     filters: {},
     drill: null,
     options: null,
+    overviewData: null,
     settingsToken: localStorage.getItem('tls_settings_token') || '',
   };
 
@@ -245,10 +246,13 @@
     }
   }
 
-  async function refreshKpi() {
+  async function refreshKpi(preloaded) {
     var source = effectiveSourceForKpi();
     var kpiFilters = Object.assign({}, state.filters, { source: source });
-    var data = await api('api/overview.php', kpiFilters);
+    var data = preloaded;
+    if (!data) {
+      data = await api('api/overview.php', kpiFilters);
+    }
     document.getElementById('kpi-sales').textContent = data.kpi.sales_total;
     document.getElementById('kpi-profit').textContent = data.kpi.profit_total;
     document.getElementById('kpi-margin').textContent = data.kpi.margin;
@@ -283,6 +287,7 @@
       api: api,
       filters: state.filters,
       drill: state.drill,
+      overviewData: state.overviewData,
       getToken: function () { return state.settingsToken; },
       setToken: function (t) {
         state.settingsToken = t || '';
@@ -327,14 +332,25 @@
 
   async function applyAll() {
     state.filters = collectFilters();
+    state.overviewData = null;
     msg('Применяю фильтры…');
     try {
       if (state.tab !== 'settings') {
-        await refreshKpi();
+        if (state.tab === 'overview') {
+          var source = effectiveSourceForKpi();
+          var overviewFilters = Object.assign({ granularity: 'month' }, state.filters, { source: source });
+          var overviewData = await api('api/overview.php', overviewFilters);
+          state.overviewData = overviewData;
+          await refreshKpi(overviewData);
+        } else {
+          await refreshKpi();
+        }
       }
       await renderTab();
+      state.overviewData = null;
       msg('Готово.');
     } catch (e) {
+      state.overviewData = null;
       msg(e.message, true);
     }
   }

@@ -8,6 +8,7 @@ Thumbs.db
 # Runtime / local data
 data/dashboard.db
 data/last_load.json
+data/filter_options.json
 data/backups/
 data/tables/
 settings.json.tmp

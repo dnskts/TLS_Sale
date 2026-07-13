@@ -81,7 +81,10 @@ window.TabOverview = {
       '<h4 class="chart-slot-title">Топ-10 клиентов по продажам</h4><div id="ov-top-clients"></div></div>' +
       '</div>';
 
-    var data = await ctx.api('api/overview.php', Object.assign({ granularity: 'month' }, ctx.filters));
+    var data = ctx.overviewData;
+    if (!data) {
+      data = await ctx.api('api/overview.php', Object.assign({ granularity: 'month' }, ctx.filters));
+    }
 
     function drillSales(extra) {
       ctx.goToDetails(Object.assign({ view: 'sales' }, extra));
