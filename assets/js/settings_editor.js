@@ -207,7 +207,10 @@ window.SettingsEditor = (function () {
       '<button type="button" class="btn-primary settings-btn-save" id="btn-save-settings">Сохранить изменения</button>' +
       '<button type="button" class="btn-secondary" id="btn-reload-settings">Перечитать с диска</button>' +
       '<button type="button" class="btn-secondary" id="btn-apply-pipeline">Применить к данным</button>' +
-      '<a href="parser_spec.php" target="_blank" rel="noopener" class="btn-secondary">Логика парсера</a>' +
+      '</div>' +
+      '<div class="settings-actions settings-links-row">' +
+      '<a href="mapping.php" class="btn-secondary">Маппинг полей</a>' +
+      '<a href="parser_spec.php" class="btn-secondary">Логика парсера</a>' +
       '</div>' +
 
       '<section class="settings-section settings-section-general">' +
@@ -226,6 +229,7 @@ window.SettingsEditor = (function () {
       '<span>Неактивные в фильтрах</span></label></div>' +
       '</div>' +
       '<div class="settings-general-info tab-note" id="settings-paths-info"></div>' +
+      '<p class="tab-note">Парсер: <a href="mapping.php">Маппинг полей</a> · <a href="parser_spec.php">Логика парсера</a></p>' +
       '</section>' +
 
       '<details class="settings-collapsible settings-section-teams">' +

@@ -15,7 +15,9 @@ require_once __DIR__ . '/parse_1c.php';
 /** @return list<string> */
 function one_c_fingerprint_headers(): array
 {
-    return ['Дата операции', 'Агент', 'Поставщик', 'Сумма продажи'];
+    require_once __DIR__ . '/mapping.php';
+    $fp = one_c_fingerprint_from_mapping();
+    return $fp !== [] ? $fp : ['Дата операции', 'Агент', 'Поставщик', 'Сумма продажи'];
 }
 
 /**

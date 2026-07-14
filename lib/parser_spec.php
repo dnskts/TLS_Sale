@@ -2,63 +2,19 @@
 /**
  * parser_spec.php
  *
- * Описание колонок парсера 1С, Битрикс и unified-таблицы для страницы parser_spec.php.
+ * Описание колонок парсера 1С, Битрикс и unified — из mapping.json.
  */
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/mapping.php';
 require_once __DIR__ . '/parse_1c.php';
 require_once __DIR__ . '/bitrix_export.php';
 
 /** @return list<array{index:int,field:string,label:string,note:string}> */
 function parser_spec_one_c(): array
 {
-    $labels = [
-        'date_operation' => 'Дата операции',
-        'datetime_operation' => 'Дата и время операции',
-        'agent' => 'Агент',
-        'issuing_agent' => 'Агент, выдавший карту',
-        'supplier' => 'Поставщик',
-        'card_type' => 'Тип карты',
-        'case_raw' => 'Обращение',
-        'channel' => 'Канал связи',
-        'category' => 'Категория',
-        'id_crm' => 'ID CRM',
-        'case_status_change_date' => 'Дата изменения статуса обращения',
-        'client_from_case' => 'Клиент из обращения',
-        'id_client_from_case' => 'ID клиента из обращения',
-        'related_company' => 'Связанная компания',
-        'case_cost_codes' => 'Коды затрат обращения',
-        'client' => 'Клиент',
-        'service_scheme' => 'Схема обслуживания',
-        'order_raw' => 'Заказ',
-        'department' => 'Подразделение',
-        'related_service_type' => 'Тип связанной услуги',
-        'product' => 'Продукт',
-        'payment_date' => 'Дата оплаты',
-        'realization_date' => 'Дата реализации',
-        'sales_amount' => 'Сумма продажи',
-        'profit' => 'Прибыль',
-        'profit_ex_vat' => 'Прибыль без НДС',
-        'supplier_commission' => 'Комиссия поставщика',
-        'vat_commission' => 'НДС комиссии',
-        'markup' => 'Наценка',
-        'vat_markup' => 'НДС наценки',
-        'service_fee' => 'Сервисный сбор',
-        'vat_fee' => 'НДС сбора',
-        'sr' => 'SR',
-        'lr' => 'LR',
-        'solid_bank_privilege' => 'Solid Bank Privilege',
-        'rs_cashback_points' => 'Баллы кэшбэка РС',
-        'points_ax' => 'Баллы AX',
-        'points_imp' => 'Баллы IMP',
-        'cashless' => 'Безнал',
-        'against_salary' => 'Против зарплаты',
-        'certificate' => 'Сертификат',
-        'loss_company' => 'Убыток компании',
-        'loss_employee' => 'Убыток сотрудника',
-        'travelers' => 'Путешественники',
-    ];
+    $mapping = load_mapping();
     $notes = [
         'date_operation' => 'Колонка по индексу 0 (первая «Дата операции» в Excel)',
         'agent' => 'Сопоставление с settings.json → names_1c',
@@ -66,56 +22,63 @@ function parser_spec_one_c(): array
         'related_service_type' => 'Приоритет категории в unified',
         'sales_amount' => 'Отрицательные значения → is_refund',
     ];
-    $cols = one_c_columns();
     $out = [];
-    foreach ($cols as $i => $field) {
+    foreach (($mapping['one_c']['columns'] ?? []) as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $field = (string) ($row['field'] ?? '');
         $out[] = [
-            'index' => $i,
+            'index' => (int) ($row['index'] ?? 0),
             'field' => $field,
-            'label' => $labels[$field] ?? $field,
+            'label' => (string) ($row['label'] ?? $row['header'] ?? $field),
             'note' => $notes[$field] ?? '',
         ];
     }
     return $out;
 }
 
-/** @return list<array{header:string,field:string,note:string}> */
+/** @return list<array{header:string,field:string,note:string,profile?:string}> */
 function parser_spec_bitrix(): array
 {
+    $mapping = load_mapping();
     $notes = [
-        'deal_no' => 'export: колонка ID',
-        'responsible_person' => 'export: Ответственный → names_bitrix',
-        'client_paid_at' => 'export: Дата оплаты Клиентом (если есть в отчёте)',
-        'planned_close_date' => 'export: Плановая дата закрытия',
-        'last_activity_at' => 'export: Дата последней активности',
-        'lead_source' => 'export: Источник / Маркетинговый канал',
-        'deal_created_at' => 'export: Дата создания',
-        'deal_result' => 'В unified: «Успех» + стадии возврата (сумма со знаком минус)',
-        'sales_amount' => 'Формула: Всего к оплате Клиентом',
-        'profit_ex_vat' => 'Формула: Комиссия + Сервисный сбор',
-        'service_fee' => 'export: Сервисный сбор',
+        'deal_no' => 'ID / Номер сделки',
+        'responsible_person' => 'Ответственный → names_bitrix',
+        'deal_result' => 'В unified: «Успех» + стадии возврата',
+        'sales_amount' => 'Из enrich.sales_amount_from',
+        'profit_ex_vat' => 'Из enrich.profit_ex_vat_from',
     ];
     $out = [];
-    foreach (bitrix_export_header_aliases() as $header => $field) {
-        if (str_starts_with($field, '_')) {
+    foreach (($mapping['bitrix_profiles'] ?? []) as $pid => $profile) {
+        if (!is_array($profile)) {
             continue;
         }
-        $out[] = [
-            'header' => $header,
-            'field' => $field,
-            'note' => $notes[$field] ?? '',
-        ];
+        $label = (string) ($profile['label'] ?? $pid);
+        foreach (($profile['headers'] ?? []) as $header => $field) {
+            if (!is_string($field) || str_starts_with($field, '_')) {
+                continue;
+            }
+            $out[] = [
+                'header' => (string) $header,
+                'field' => $field,
+                'note' => ($notes[$field] ?? '') . ' [' . $label . ']',
+                'profile' => (string) $pid,
+            ];
+        }
+        $enrich = $profile['enrich'] ?? [];
+        if (is_array($enrich)) {
+            $salesFrom = $enrich['sales_amount_from'] ?? null;
+            if (is_string($salesFrom) && $salesFrom !== '') {
+                $out[] = [
+                    'header' => $salesFrom . ' → sales_amount',
+                    'field' => 'sales_amount',
+                    'note' => 'enrich [' . $label . ']',
+                    'profile' => (string) $pid,
+                ];
+            }
+        }
     }
-    $out[] = [
-        'header' => 'Всего к оплате Клиентом',
-        'field' => 'sales_amount',
-        'note' => 'Источник для sales_amount (не alias, вычисляется)',
-    ];
-    $out[] = [
-        'header' => 'Комиссия + Сервисный сбор',
-        'field' => 'profit_ex_vat',
-        'note' => 'Источник для profit_ex_vat (вычисляется)',
-    ];
     return $out;
 }
 
@@ -137,12 +100,12 @@ function parser_spec_unified(): array
         ['field' => 'category', 'label' => 'Категория', 'sources' => '1c: related_service_type|category; bitrix: category', 'note' => 'Синонимы: settings.category_aliases'],
         ['field' => 'channel', 'label' => 'Канал', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'card_type', 'label' => 'Тип карты', 'sources' => '1c / bitrix', 'note' => ''],
-        ['field' => 'client_type', 'label' => 'Тип клиента', 'sources' => '1c (когда появится колонка «Тип клиента») / bitrix', 'note' => 'Пока в 1С нет колонки — лейбл «1С (нет типа клиента)»'],
-        ['field' => 'request_type', 'label' => 'Тип запроса', 'sources' => 'bitrix; 1c via category_to_request_type', 'note' => 'Синонимы: settings.request_type_aliases; вывод: Air Tickets/Авиабилет → Travel'],
+        ['field' => 'client_type', 'label' => 'Тип клиента', 'sources' => '1c extra_by_header / bitrix', 'note' => ''],
+        ['field' => 'request_type', 'label' => 'Тип запроса', 'sources' => 'bitrix; 1c via category_to_request_type', 'note' => ''],
         ['field' => 'sales_amount', 'label' => 'Сумма продажи', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'profit_ex_vat', 'label' => 'Прибыль без НДС', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'service_fee', 'label' => 'Сервисный сбор', 'sources' => '1c / bitrix', 'note' => ''],
-        ['field' => 'is_refund', 'label' => 'Возврат', 'sources' => '1c: sales_amount < 0; bitrix: стадии «Возврат» / «Возврат подтверждён»', 'note' => ''],
+        ['field' => 'is_refund', 'label' => 'Возврат', 'sources' => '1c: sales_amount < 0; bitrix: стадии возврата', 'note' => ''],
         ['field' => 'raw_id', 'label' => 'ID строки', 'sources' => '1c: order_no; bitrix: deal_no', 'note' => ''],
         ['field' => 'date_fallback_used', 'label' => 'Fallback даты', 'sources' => 'bitrix', 'note' => 'true, если взята deal_created_at'],
     ];
