@@ -48,7 +48,7 @@ function deal_cycle_days(array $deal, ?string $asOf = null): ?int
     $result = clean_str($deal['deal_result'] ?? null);
     $end = null;
     if ($result === 'Успех') {
-        $end = deal_day($deal['client_paid_at'] ?? null)
+        $end = deal_day($deal['date_operation'] ?? null)
             ?: deal_day($deal['service_date'] ?? null);
     } elseif ($result === 'Проиграна') {
         $end = deal_day($deal['service_date'] ?? null) ?: ($asOf ?: date('Y-m-d'));
@@ -189,7 +189,7 @@ function build_stuck_deals(array $deals, array $funnelCfg, int $limit = 10, ?str
         $rows[] = [
             'deal_no' => $deal['deal_no'] ?? null,
             'client' => $deal['client'] ?? '',
-            'agent_display' => $deal['agent_display'] ?? $deal['responsible_person'] ?? '',
+            'agent_display' => $deal['agent_display'] ?? $deal['agent'] ?? '',
             'deal_status' => $stage,
             'sales_amount' => deal_amount($deal),
             'age_days' => $age,

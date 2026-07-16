@@ -25,7 +25,7 @@ if ($view === 'deals_bitrix') {
             'deal_status' => clean_str($row['deal_status'] ?? null) ?? '',
             'deal_result' => clean_str($row['deal_result'] ?? null) ?? '',
             'client' => clean_str($row['client'] ?? null) ?? '',
-            'responsible_person' => clean_str($row['responsible_person'] ?? null) ?? '',
+            'responsible_person' => clean_str($row['agent'] ?? null) ?? '',
             'sales_amount' => $row['sales_amount'] ?? 0,
             'lost_deal_reason' => clean_str($row['lost_deal_reason'] ?? null) ?? '',
         ];
@@ -33,18 +33,18 @@ if ($view === 'deals_bitrix') {
 } elseif ($view === 'operations_1c') {
     $rows = apply_operations_1c_filters(storage_load_table('operations_1c'), $filters);
     foreach (array_slice($rows, 0, 2000) as $row) {
-        $category = clean_str($row['related_service_type'] ?? null) ?? clean_str($row['category'] ?? null) ?? '';
+        $category = clean_str($row['category'] ?? null) ?? '';
         $teams = $row['agent_teams'] ?? [($row['agent_team'] ?? '')];
         $teamLabel = implode(', ', array_filter(array_map('strval', $teams)));
         $display[] = [
             'date' => $row['date_operation'] ?? '',
             'agent' => clean_str($row['agent'] ?? null) ?? '',
             'agent_team' => $teamLabel,
-            'department' => clean_str($row['department'] ?? null) ?? '',
+            'department' => clean_str($row['client_type'] ?? null) ?? '',
             'category' => $category,
             'client' => clean_str($row['client'] ?? null) ?? '',
             'sales_amount' => $row['sales_amount'] ?? 0,
-            'order_no' => clean_str($row['order_raw'] ?? null) ?? '',
+            'order_no' => clean_str($row['deal_no'] ?? null) ?? '',
         ];
     }
 } else {

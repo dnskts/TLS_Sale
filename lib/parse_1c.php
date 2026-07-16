@@ -20,6 +20,25 @@ function one_c_columns(): array
     return one_c_columns_from_mapping();
 }
 
+function parse_1c_case_id(mixed $value): ?string
+{
+    $raw = clean_str($value === null ? null : (string) $value);
+    if ($raw === null || !preg_match('/Кейс\s+(\d+)/iu', $raw, $m)) {
+        return null;
+    }
+    $normalized = ltrim($m[1], '0');
+    return $normalized === '' ? '0' : $normalized;
+}
+
+function parse_1c_order_no(mixed $value): ?string
+{
+    $raw = clean_str($value === null ? null : (string) $value);
+    if ($raw === null || !preg_match('/(0000-\d+)/', $raw, $m)) {
+        return null;
+    }
+    return $m[1];
+}
+
 /**
  * @return list<array<string,mixed>>
  */
@@ -66,26 +85,17 @@ function parse_1c(string $path, string $sheetName): array
             }
         }
 
-        // Кейс / сделка: номер из case_raw или deal_no (одно бизнес-поле в маппинге)
-        $caseRaw = $row['case_raw'] ?? $row['deal_no'] ?? '';
-        $row['case_id'] = null;
-        if ($caseRaw !== null && $caseRaw !== '' && preg_match('/000002(\d+)/', (string) $caseRaw, $m)) {
-            $row['case_id'] = $m[1];
-        }
-        if (!isset($row['case_raw']) && isset($row['deal_no'])) {
-            $row['case_raw'] = $row['deal_no'];
-        }
-
-        $orderRaw = $row['order_raw'] ?? '';
-        $row['order_no'] = null;
-        if ($orderRaw !== null && $orderRaw !== '' && preg_match('/(0000-\d+)/', (string) $orderRaw, $m)) {
-            $row['order_no'] = $m[1];
+        // Канонические поля сразу заменяют длинные исходные строки.
+        $row['case_id'] = parse_1c_case_id($row['case_id'] ?? null);
+        $row['deal_no'] = parse_1c_order_no($row['deal_no'] ?? null);
+        // Если I d CRM пуст, используем «ID клиента из кейса» (индекс 13),
+        // не сохраняя отдельное техническое поле.
+        if (empty($row['client_id'])) {
+            $row['client_id'] = mapping_coerce_cell('client_id', $line[13] ?? null);
         }
 
         $row['source'] = '1c';
-        if (!array_key_exists('client_type', $row)) {
-            $row['client_type'] = null;
-        }
+        $row['is_refund'] = isset($row['sales_amount']) && (float) $row['sales_amount'] < 0;
         $out[] = $row;
     }
     return $out;

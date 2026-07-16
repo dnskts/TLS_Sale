@@ -2045,6 +2045,18 @@
   line-height: 1.2;
 }
 
+.mapping-group-header td {
+  padding: 8px 6px;
+  background: var(--bg-sidebar, #f4f5f7);
+  border-top: 1px solid var(--border-light, #e0e0e0);
+}
+
+.mapping-group-header .map-toggle-group {
+  min-width: 260px;
+  text-align: left;
+  font-weight: 600;
+}
+
 .mapping-enrich-block {
   margin-bottom: 12px;
   padding: 10px 12px;

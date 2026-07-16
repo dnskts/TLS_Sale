@@ -14,13 +14,13 @@
                 "index": 0,
                 "field": "date_operation",
                 "header": "Дата операции",
-                "label": "Дата операции (1С)"
+                "label": "Дата финансовой операции"
             },
             {
                 "index": 2,
                 "field": "agent",
                 "header": "Агент",
-                "label": "Агент 1С"
+                "label": "Агент продажи (1С / Б24)"
             },
             {
                 "index": 4,
@@ -36,9 +36,9 @@
             },
             {
                 "index": 6,
-                "field": "case_raw",
+                "field": "case_id",
                 "header": "Кейс",
-                "label": "Кейс / обращение"
+                "label": "Номер кейса (равен номеру лида)"
             },
             {
                 "index": 7,
@@ -47,10 +47,10 @@
                 "label": "Канал связи"
             },
             {
-                "index": 13,
-                "field": "id_client_from_case",
-                "header": "ID клиента из кейса",
-                "label": "ID клиента из кейса"
+                "index": 9,
+                "field": "client_id",
+                "header": "I d CRM",
+                "label": "ID клиента (1С: I d CRM, fallback ID из кейса)"
             },
             {
                 "index": 16,
@@ -59,28 +59,34 @@
                 "label": "Клиент (ФИО / название)"
             },
             {
-                "index": 17,
-                "field": "service_scheme",
-                "header": "Схема реализации услуг",
-                "label": "Схема реализации услуг"
+                "index": 18,
+                "field": "deal_no",
+                "header": "Заказ",
+                "label": "Номер сделки в CRM"
             },
             {
                 "index": 19,
-                "field": "department",
+                "field": "client_type",
                 "header": "Подразделение",
-                "label": "Подразделение"
+                "label": "Тип клиента"
             },
             {
                 "index": 20,
-                "field": "related_service_type",
+                "field": "category",
                 "header": "Связанный вид услуги",
-                "label": "Связанный вид услуги"
+                "label": "Категория / тип сделки"
+            },
+            {
+                "index": 22,
+                "field": "payment_date",
+                "header": "Дата оплаты",
+                "label": "Дата оплаты (Б24: копия даты операции)"
             },
             {
                 "index": 23,
-                "field": "realization_date",
+                "field": "service_date",
                 "header": "Дата реализация",
-                "label": "Дата реализации"
+                "label": "Дата оказания услуги"
             },
             {
                 "index": 24,
@@ -89,133 +95,32 @@
                 "label": "Сумма продажи"
             },
             {
-                "index": 25,
-                "field": "profit",
-                "header": "Прибыль",
-                "label": "Прибыль"
-            },
-            {
                 "index": 26,
                 "field": "profit_ex_vat",
                 "header": "Прибыль без НДС",
                 "label": "Прибыль без НДС"
             },
             {
-                "index": 27,
-                "field": "_commission",
-                "header": "Комиссия поставщика",
-                "label": "Комиссия (служебное → profit)"
-            },
-            {
-                "index": 28,
-                "field": "vat_commission",
-                "header": "Сумма НДС(Комиссии)",
-                "label": "НДС комиссии"
-            },
-            {
-                "index": 29,
-                "field": "markup",
-                "header": "Наценка",
-                "label": "Наценка"
-            },
-            {
-                "index": 30,
-                "field": "vat_markup",
-                "header": "Сумма НДС(Наценка)",
-                "label": "НДС наценки"
-            },
-            {
                 "index": 31,
                 "field": "service_fee",
                 "header": "Сервисный сбор",
                 "label": "Сервисный сбор"
-            },
-            {
-                "index": 32,
-                "field": "vat_fee",
-                "header": "Сумма НДС(Сбор)",
-                "label": "НДС сбора"
-            },
-            {
-                "index": 33,
-                "field": "sr",
-                "header": "SR",
-                "label": "SR"
-            },
-            {
-                "index": 34,
-                "field": "lr",
-                "header": "LR",
-                "label": "LR"
-            },
-            {
-                "index": 36,
-                "field": "rs_cashback_points",
-                "header": "Баллы RS Cashback",
-                "label": "Баллы RS Cashback"
-            },
-            {
-                "index": 37,
-                "field": "points_ax",
-                "header": "Баллы AX",
-                "label": "Баллы AX"
-            },
-            {
-                "index": 38,
-                "field": "points_imp",
-                "header": "Баллы IMP",
-                "label": "Баллы IMP"
-            },
-            {
-                "index": 39,
-                "field": "cashless",
-                "header": "Безнал",
-                "label": "Безнал"
-            },
-            {
-                "index": 40,
-                "field": "against_salary",
-                "header": "В счет ЗП",
-                "label": "В счёт ЗП"
-            },
-            {
-                "index": 41,
-                "field": "certificate",
-                "header": "Сертификат",
-                "label": "Сертификат"
-            },
-            {
-                "index": 42,
-                "field": "loss_company",
-                "header": "Убыток на компанию",
-                "label": "Убыток на компанию"
-            },
-            {
-                "index": 43,
-                "field": "loss_employee",
-                "header": "Убыток на сотрудника",
-                "label": "Убыток на сотрудника"
-            },
-            {
-                "index": 44,
-                "field": "travelers",
-                "header": "Путешественники",
-                "label": "Путешественники"
-            },
-            {
-                "index": 46,
-                "field": "deal_title",
-                "header": "Тема кейса",
-                "label": "Название сделки"
             }
         ],
         "extra_by_header": {
-            "Тип клиента": "client_type"
+            "Тип запроса": "request_type",
+            "Город": "city",
+            "Страна": "country",
+            "Дата окончания": "end_date",
+            "Отель": "hotel",
+            "Количество ночей": "nights_count",
+            "Количество номеров": "rooms_count",
+            "Дата начала": "start_date"
         }
     },
     "bitrix_profiles": {
         "deals_export": {
-            "label": "Отчет по сделкам (новый)",
+            "label": "Б24 NEW — Отчет по сделкам",
             "sheet_hint": "Отчет по сделкам",
             "fingerprint": [
                 "ID",
@@ -229,75 +134,65 @@
                 "Клиент"
             ],
             "headers": {
+                "Дата оплаты клиентом": "date_operation",
                 "Дата оплаты Клиентом": "date_operation",
                 "Ответственный": "agent",
                 "Полное наименование организации": "supplier",
+                "Компания": "supplier",
                 "Тип карты": "card_type",
-                "ID": "case_raw",
+                "Лид": "case_id",
                 "Канал связи": "channel",
-                "ID клиента": "id_client_from_case",
+                "ID клиента": "client_id",
                 "Клиент": "client",
-                "Схема финансовой карты": "service_scheme",
-                "Тип клиента": "department",
-                "Категория": "related_service_type",
-                "Дата оказания услуги": "realization_date",
+                "ID": "deal_no",
+                "Тип клиента": "client_type",
+                "Категория": "category",
+                "Дата оказания услуги": "service_date",
                 "Сервисный сбор": "service_fee",
-                "% участия агента в продаже": "agent_sale_participation",
                 "Дата создания": "deal_created_at",
                 "Результат сделки": "deal_result",
                 "Стадия": "deal_status",
-                "Название": "deal_title",
-                "Лид": "lead_id",
+                "Маркетинговый канал": "lead_source",
                 "Причина стадии Сделка проиграна": "lost_deal_reason",
                 "Тип запроса": "request_type",
-                "Комиссия": "_commission",
-                "Всего к оплате Клиентом": "_total_client_pay"
+                "Город": "city",
+                "Страна": "country",
+                "Дата окончания": "end_date",
+                "Отель": "hotel",
+                "Количество ночей": "nights_count",
+                "Количество номеров": "rooms_count",
+                "Дата начала": "start_date",
+                "Дополнительная выгода": "additional_benefit",
+                "Возврат клиенту дополнительной выгоды": "additional_benefit_refund",
+                "Сумма возврата клиенту": "client_refund_amount",
+                "Комиссия": "commission",
+                "Возврат комиссии поставщика": "commission_refund",
+                "Сбор РС ТЛС за возврат": "rstls_return_fee",
+                "Штраф РС ТЛС за возврат": "rstls_return_penalty",
+                "Возврат клиенту сбора РС ТЛС": "service_fee_refund",
+                "Сбор поставщика за возврат": "supplier_return_fee",
+                "Штраф поставщика за возврат": "supplier_return_penalty",
+                "Всего к оплате Клиентом": "total_client_pay"
             },
-            "enrich": {
-                "sales_amount_from": "_total_client_pay",
-                "profit_ex_vat_from": [
-                    "_commission",
-                    "service_fee"
-                ]
-            }
-        },
-        "universal": {
-            "label": "Универсальный отчёт (старый)",
-            "sheet_hint": null,
-            "fingerprint": [
-                "Номер сделки",
-                "Ответственное лицо",
-                "Сумма продажи",
-                "Статус сделки"
+            "formulas": {
+                "sales_amount": "\"Всего к оплате Клиентом\"",
+                "profit_ex_vat": "NZ(\"Дополнительная выгода\") + (NZ(\"Сервисный сбор\") + NZ(\"Комиссия\")) / vat_factor",
+                "profit": "NZ(\"Дополнительная выгода\") + NZ(\"Сервисный сбор\") + NZ(\"Комиссия\")",
+                "profit_after_refund": "NZ(\"Дополнительная выгода\") + NZ(\"Сервисный сбор\") + NZ(\"Комиссия\") - NZ(\"Возврат клиенту дополнительной выгоды\") - NZ(\"Возврат клиенту сбора РС ТЛС\") - NZ(\"Возврат комиссии поставщика\") + NZ(\"Сбор РС ТЛС за возврат\") + NZ(\"Штраф РС ТЛС за возврат\")",
+                "profit_after_refund_ex_vat": "(NZ(\"Дополнительная выгода\") - NZ(\"Возврат клиенту дополнительной выгоды\")) + (NZ(\"Сервисный сбор\") - NZ(\"Возврат клиенту сбора РС ТЛС\") + NZ(\"Комиссия\") - NZ(\"Возврат комиссии поставщика\") + NZ(\"Сбор РС ТЛС за возврат\") + NZ(\"Штраф РС ТЛС за возврат\")) / vat_factor",
+                "sales_amount_after_refund": "\"Всего к оплате Клиентом\" - NZ(\"Сумма возврата клиенту\")",
+                "supplier_retained": "NZ(\"Сбор поставщика за возврат\") + NZ(\"Штраф поставщика за возврат\")"
+            },
+            "vat_rates": [
+                {
+                    "effective_from": "1900-01-01",
+                    "factor": 1.2
+                },
+                {
+                    "effective_from": "2026-01-01",
+                    "factor": 1.22
+                }
             ],
-            "headers": {
-                "Дата платы клиентом": "date_operation",
-                "Ответственное лицо": "agent",
-                "Полное наименование организации": "supplier",
-                "Партнер": "supplier",
-                "Тип карты": "card_type",
-                "Номер сделки": "case_raw",
-                "Канал связи": "channel",
-                "ID клиента": "id_client_from_case",
-                "Клиент": "client",
-                "Схема финансовой карты": "service_scheme",
-                "Тип клиента": "department",
-                "Категория": "related_service_type",
-                "Дата оказания услуги": "realization_date",
-                "Сумма продажи": "sales_amount",
-                "Прибыль": "profit",
-                "Прибыль без НДС": "profit_ex_vat",
-                "Сервисный сбор": "service_fee",
-                "% участия агента в продаже": "agent_sale_participation",
-                "Дата создания сделки": "deal_created_at",
-                "Результат сделки": "deal_result",
-                "Статус сделки": "deal_status",
-                "Название сделки": "deal_title",
-                "Лид": "lead_id",
-                "Причина стадии Сделка проиграна": "lost_deal_reason",
-                "Тип запроса": "request_type",
-                "Комиссия": "_commission"
-            },
             "enrich": {
                 "sales_amount_from": "sales_amount",
                 "profit_ex_vat_from": [
@@ -308,67 +203,83 @@
     },
     "canonical_fields": {
         "one_c": [
-            "_commission",
-            "against_salary",
             "agent",
             "card_type",
-            "case_raw",
-            "cashless",
-            "certificate",
+            "case_id",
+            "category",
             "channel",
+            "city",
             "client",
+            "client_id",
+            "client_type",
+            "country",
             "date_operation",
-            "deal_title",
-            "department",
-            "id_client_from_case",
-            "loss_company",
-            "loss_employee",
-            "lr",
-            "markup",
-            "points_ax",
-            "points_imp",
-            "profit",
+            "deal_no",
+            "end_date",
+            "hotel",
+            "nights_count",
+            "payment_date",
             "profit_ex_vat",
-            "realization_date",
-            "related_service_type",
-            "rs_cashback_points",
+            "request_type",
+            "rooms_count",
             "sales_amount",
+            "service_date",
             "service_fee",
-            "service_scheme",
-            "sr",
-            "supplier",
-            "travelers",
-            "vat_commission",
-            "vat_fee",
-            "vat_markup"
+            "start_date",
+            "supplier"
         ],
         "bitrix": [
-            "_commission",
-            "_total_client_pay",
+            "additional_benefit",
+            "additional_benefit_refund",
             "agent",
-            "agent_sale_participation",
+            "bitrix_format",
             "card_type",
-            "case_raw",
+            "case_id",
+            "category",
             "channel",
+            "city",
             "client",
+            "client_id",
+            "client_refund_amount",
+            "client_type",
+            "commission",
+            "commission_refund",
+            "country",
+            "date_fallback_used",
+            "date_for_sales",
             "date_operation",
             "deal_created_at",
+            "deal_no",
             "deal_result",
             "deal_status",
-            "deal_title",
-            "department",
-            "id_client_from_case",
-            "lead_id",
+            "end_date",
+            "hotel",
+            "is_refund",
+            "lead_source",
             "lost_deal_reason",
+            "nights_count",
             "profit",
+            "profit_after_refund",
+            "profit_after_refund_ex_vat",
             "profit_ex_vat",
-            "realization_date",
-            "related_service_type",
+            "raw_id",
             "request_type",
+            "rooms_count",
+            "rstls_return_fee",
+            "rstls_return_penalty",
             "sales_amount",
+            "sales_amount_after_refund",
+            "service_date",
             "service_fee",
-            "service_scheme",
-            "supplier"
+            "service_fee_refund",
+            "source",
+            "start_date",
+            "supplier",
+            "supplier_retained",
+            "supplier_return_fee",
+            "supplier_return_penalty",
+            "total_client_pay",
+            "vat_factor"
         ]
     }
 }

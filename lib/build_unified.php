@@ -114,12 +114,12 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
 
     foreach ($operations1c as $record) {
         $sales = isset($record['sales_amount']) ? (float) $record['sales_amount'] : null;
-        $resolved = resolve_agent_1c($record['agent'] ?? null, $settings, $record['department'] ?? null);
+        $resolved = resolve_agent_1c($record['agent'] ?? null, $settings, $record['client_type'] ?? null);
         $team = $resolved['team'];
         $agentTeams = $resolved['teams'] ?? [$team];
         // Если агент неизвестен — пробуем department_map
         if (str_starts_with((string) $resolved['agent_key'], 'unknown:')) {
-            $dept = clean_str($record['department'] ?? null);
+            $dept = clean_str($record['client_type'] ?? null);
             if ($dept !== null) {
                 foreach ($departmentMap as $key => $display) {
                     if ($display === $dept || $key === $dept) {
@@ -134,9 +134,12 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
             }
         }
         $rawCategory = clean_str($record['category'] ?? null);
-        $relatedService = clean_str($record['related_service_type'] ?? null);
-        $category = normalize_category($relatedService ?? $rawCategory, $settings);
-        $requestType = resolve_request_type(null, [$rawCategory, $relatedService, $category], $settings);
+        $category = normalize_category($rawCategory, $settings);
+        $requestType = resolve_request_type(
+            clean_str($record['request_type'] ?? null),
+            [$rawCategory, $category],
+            $settings
+        );
         $rows[] = [
             'source' => '1c',
             'date' => $record['date_operation'] ?? null,
@@ -147,7 +150,7 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
             'agent_is_active' => $resolved['is_active'],
             'agent_raw' => clean_str($record['agent'] ?? null),
             'client' => clean_str($record['client'] ?? null),
-            'client_id' => clean_str($record['id_crm'] ?? null),
+            'client_id' => clean_str($record['client_id'] ?? null),
             'partner_or_supplier' => clean_str($record['supplier'] ?? null),
             'category' => $category,
             'channel' => clean_str($record['channel'] ?? null),
@@ -158,23 +161,37 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
             'profit_ex_vat' => isset($record['profit_ex_vat']) ? to_float($record['profit_ex_vat']) : null,
             'service_fee' => isset($record['service_fee']) ? to_float($record['service_fee']) : null,
             'is_refund' => $sales !== null && $sales < 0,
-            'raw_id' => clean_str($record['order_no'] ?? null),
+            'raw_id' => clean_str($record['deal_no'] ?? null),
+            'deal_no' => clean_str($record['deal_no'] ?? null),
+            'case_id' => clean_str($record['case_id'] ?? null),
+            'service_date' => $record['service_date'] ?? null,
+            'country' => clean_str($record['country'] ?? null),
+            'city' => clean_str($record['city'] ?? null),
+            'hotel' => clean_str($record['hotel'] ?? null),
+            'start_date' => $record['start_date'] ?? null,
+            'end_date' => $record['end_date'] ?? null,
+            'nights_count' => isset($record['nights_count']) ? to_float($record['nights_count']) : null,
+            'rooms_count' => isset($record['rooms_count']) ? to_float($record['rooms_count']) : null,
             'date_fallback_used' => null,
         ];
     }
 
     foreach ($dealsBitrix as $record) {
         $result = clean_str($record['deal_result'] ?? null);
-        $isRefund = is_bitrix_refund_deal($record, $settings);
+        $refundAmount = to_float($record['client_refund_amount'] ?? null);
+        $isRefund = is_bitrix_refund_deal($record, $settings)
+            || ($refundAmount !== null && $refundAmount > 0);
         if ($result !== $success && !$isRefund) {
             continue;
         }
-        $sales = isset($record['sales_amount']) ? to_float($record['sales_amount']) : null;
-        // Возвраты CRM хранят сумму положительной → в unified как у 1С (минус).
-        if ($isRefund && $sales !== null) {
-            $sales = -abs($sales);
-        }
-        $resolved = resolve_agent_bitrix($record['responsible_person'] ?? null, $settings);
+        // Ручной свод использует продажу/прибыль уже с учётом возврата.
+        $sales = array_key_exists('sales_amount_after_refund', $record)
+            ? to_float($record['sales_amount_after_refund'])
+            : (isset($record['sales_amount']) ? to_float($record['sales_amount']) : null);
+        $profitExVat = array_key_exists('profit_after_refund_ex_vat', $record)
+            ? to_float($record['profit_after_refund_ex_vat'])
+            : (isset($record['profit_ex_vat']) ? to_float($record['profit_ex_vat']) : null);
+        $resolved = resolve_agent_bitrix($record['agent'] ?? null, $settings);
         $bTeams = $resolved['teams'] ?? [$resolved['team']];
         $dealNo = $record['deal_no'] ?? null;
         $rawId = null;
@@ -189,10 +206,10 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
             'agent_team' => $resolved['team'] ?: 'Без команды',
             'agent_teams' => $bTeams,
             'agent_is_active' => $resolved['is_active'],
-            'agent_raw' => clean_str($record['responsible_person'] ?? null),
+            'agent_raw' => clean_str($record['agent'] ?? null),
             'client' => clean_str($record['client'] ?? null),
-            'client_id' => clean_str($record['id_client'] ?? null),
-            'partner_or_supplier' => clean_str($record['partner'] ?? null),
+            'client_id' => clean_str($record['client_id'] ?? null),
+            'partner_or_supplier' => clean_str($record['supplier'] ?? null),
             'category' => normalize_category(clean_str($record['category'] ?? null), $settings),
             'channel' => clean_str($record['channel'] ?? null),
             'card_type' => clean_str($record['card_type'] ?? null),
@@ -206,10 +223,23 @@ function build_sales_unified(array $operations1c, array $dealsBitrix, array $set
                 $settings
             ),
             'sales_amount' => $sales,
-            'profit_ex_vat' => isset($record['profit_ex_vat']) ? to_float($record['profit_ex_vat']) : null,
+            'profit_ex_vat' => $profitExVat,
             'service_fee' => isset($record['service_fee']) ? to_float($record['service_fee']) : null,
             'is_refund' => $isRefund,
             'raw_id' => $rawId,
+            'deal_no' => clean_str($record['deal_no'] ?? null),
+            'case_id' => clean_str($record['case_id'] ?? null),
+            'service_date' => $record['service_date'] ?? null,
+            'country' => clean_str($record['country'] ?? null),
+            'city' => clean_str($record['city'] ?? null),
+            'hotel' => clean_str($record['hotel'] ?? null),
+            'start_date' => $record['start_date'] ?? null,
+            'end_date' => $record['end_date'] ?? null,
+            'nights_count' => isset($record['nights_count']) ? to_float($record['nights_count']) : null,
+            'rooms_count' => isset($record['rooms_count']) ? to_float($record['rooms_count']) : null,
+            'sales_amount_before_refund' => isset($record['sales_amount']) ? to_float($record['sales_amount']) : null,
+            'profit_ex_vat_before_refund' => isset($record['profit_ex_vat']) ? to_float($record['profit_ex_vat']) : null,
+            'client_refund_amount' => isset($record['client_refund_amount']) ? to_float($record['client_refund_amount']) : null,
             'date_fallback_used' => $record['date_fallback_used'] ?? null,
         ];
     }

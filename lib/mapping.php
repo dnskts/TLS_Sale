@@ -33,98 +33,83 @@ function clear_mapping_cache(): void
  */
 function default_mapping(): array
 {
-    $oneCFields = [
-        'date_operation', 'datetime_operation', 'agent', 'issuing_agent', 'supplier',
-        'card_type', 'case_raw', 'channel', 'category', 'id_crm',
-        'case_status_change_date', 'client_from_case',
-        // Excel 1C с ~2026: между «Клиент из кейса» и «ID клиента» стоит «Департамент»
-        'case_department', 'id_client_from_case', 'related_company',
-        'case_cost_codes', 'client', 'service_scheme', 'order_raw', 'department',
-        'related_service_type', 'product', 'payment_date', 'realization_date',
-        'sales_amount', 'profit', 'profit_ex_vat', 'supplier_commission', 'vat_commission',
-        'markup', 'vat_markup', 'service_fee', 'vat_fee', 'sr', 'lr',
-        'solid_bank_privilege', 'rs_cashback_points', 'points_ax', 'points_imp',
-        'cashless', 'against_salary', 'certificate', 'loss_company', 'loss_employee', 'travelers',
+    // Только поля 1С, используемые дашбордом или формулами.
+    $columns = [
+        ['index' => 0, 'field' => 'date_operation', 'header' => 'Дата операции', 'label' => 'Дата операции'],
+        ['index' => 2, 'field' => 'agent', 'header' => 'Агент', 'label' => 'Агент'],
+        ['index' => 4, 'field' => 'supplier', 'header' => 'Поставщик', 'label' => 'Поставщик'],
+        ['index' => 5, 'field' => 'card_type', 'header' => 'Тип карты', 'label' => 'Тип карты'],
+        ['index' => 6, 'field' => 'case_id', 'header' => 'Кейс', 'label' => 'Номер кейса / лида'],
+        ['index' => 7, 'field' => 'channel', 'header' => 'Канал связи', 'label' => 'Канал связи'],
+        ['index' => 9, 'field' => 'client_id', 'header' => 'I d CRM', 'label' => 'ID клиента'],
+        ['index' => 16, 'field' => 'client', 'header' => 'Клиент', 'label' => 'Клиент'],
+        ['index' => 18, 'field' => 'deal_no', 'header' => 'Заказ', 'label' => 'Номер сделки / заказа'],
+        ['index' => 19, 'field' => 'client_type', 'header' => 'Подразделение', 'label' => 'Тип клиента'],
+        ['index' => 20, 'field' => 'category', 'header' => 'Связанный вид услуги', 'label' => 'Категория'],
+        ['index' => 22, 'field' => 'payment_date', 'header' => 'Дата оплаты', 'label' => 'Дата оплаты'],
+        ['index' => 23, 'field' => 'service_date', 'header' => 'Дата реализация', 'label' => 'Дата услуги'],
+        ['index' => 24, 'field' => 'sales_amount', 'header' => 'Сумма продажи', 'label' => 'Сумма продажи'],
+        ['index' => 26, 'field' => 'profit_ex_vat', 'header' => 'Прибыль без НДС', 'label' => 'Прибыль без НДС'],
+        ['index' => 31, 'field' => 'service_fee', 'header' => 'Сервисный сбор', 'label' => 'Сервисный сбор'],
     ];
-    $oneCHeaders = [
-        'Дата операции', 'Дата операции', 'Агент', 'Выписывающий агент', 'Поставщик',
-        'Тип карты', 'Кейс', 'Канал связи', 'Категория', 'I d CRM',
-        'Дата смены статуса кейса', 'Клиент из кейса', 'Департамент', 'ID клиента из кейса', 'Связанная компания',
-        'Кост коды кейса', 'Клиент', 'Схема реализации услуг', 'Заказ', 'Подразделение',
-        'Связанный вид услуги', 'Продукт', 'Дата оплаты', 'Дата реализация',
-        'Сумма продажи', 'Прибыль', 'Прибыль без НДС', 'Комиссия поставщика', 'Сумма НДС(Комиссии)',
-        'Наценка', 'Сумма НДС(Наценка)', 'Сервисный сбор', 'Сумма НДС(Сбор)', 'SR', 'LR',
-        'Привилегия SOLID BANK', 'Баллы RS Cashback', 'Баллы AX', 'Баллы IMP',
-        'Безнал', 'В счет ЗП', 'Сертификат', 'Убыток на компанию', 'Убыток на сотрудника', 'Путешественники',
-    ];
-    $columns = [];
-    foreach ($oneCFields as $i => $field) {
-        $columns[] = [
-            'index' => $i,
-            'field' => $field,
-            'header' => $oneCHeaders[$i] ?? $field,
-            'label' => $oneCHeaders[$i] ?? $field,
-        ];
-    }
+    $oneCFields = array_column($columns, 'field');
 
+    // Б24 NEW: только поля дашборда, туризма и финансовых формул.
     $dealsExport = [
         'ID' => 'deal_no',
-        'Название' => 'deal_title',
         'Дата создания' => 'deal_created_at',
-        'Стадия' => 'deal_status',
-        'Ответственный' => 'responsible_person',
-        '% участия агента в продаже' => 'agent_sale_participation',
-        'Тип клиента' => 'client_type',
-        'Клиент' => 'client',
-        'ID клиента' => 'id_client',
+        'ID клиента' => 'client_id',
         'Тип карты' => 'card_type',
         'Категория' => 'category',
+        'Город' => 'city',
+        'Клиент' => 'client',
+        'Тип клиента' => 'client_type',
         'Канал связи' => 'channel',
-        'Лид' => 'lead_id',
+        'Страна' => 'country',
+        'Причина стадии Сделка проиграна' => 'lost_deal_reason',
+        'Результат сделки' => 'deal_result',
+        'Стадия' => 'deal_status',
+        'Дата окончания' => 'end_date',
+        'Отель' => 'hotel',
+        'Лид' => 'case_id',
+        'Маркетинговый канал' => 'lead_source',
+        'Количество ночей' => 'nights_count',
+        'Полное наименование организации' => 'supplier',
+        'Компания' => 'supplier',
         'Тип запроса' => 'request_type',
+        'Ответственный' => 'agent',
+        'Количество номеров' => 'rooms_count',
         'Дата оказания услуги' => 'service_date',
-        'Дата оплаты Клиентом' => 'client_paid_at',
+        'Дата начала' => 'start_date',
+        'Дополнительная выгода' => 'additional_benefit',
+        'Сервисный сбор' => 'service_fee',
+        'Комиссия' => 'commission',
+        'Всего к оплате Клиентом' => 'total_client_pay',
+        'Сумма возврата клиенту' => 'client_refund_amount',
+        'Возврат комиссии поставщика' => 'commission_refund',
+        'Возврат клиенту сбора РС ТЛС' => 'service_fee_refund',
+        'Возврат клиенту дополнительной выгоды' => 'additional_benefit_refund',
+        'Сбор поставщика за возврат' => 'supplier_return_fee',
+        'Штраф поставщика за возврат' => 'supplier_return_penalty',
+        'Сбор РС ТЛС за возврат' => 'rstls_return_fee',
+        'Штраф РС ТЛС за возврат' => 'rstls_return_penalty',
+        // Поле будет добавлено в следующую версию выгрузки.
+        'Дата оплаты клиентом' => 'date_operation',
+        'Дата оплаты Клиентом' => 'date_operation',
         'Плановая дата закрытия' => 'planned_close_date',
         'Дата последней активности' => 'last_activity_at',
-        'Источник' => 'lead_source',
-        'Маркетинговый канал' => 'lead_source',
         'Количество звонков' => 'calls_count',
         'Количество встреч' => 'meetings_count',
-        'Результат сделки' => 'deal_result',
-        'Причина стадии Сделка проиграна' => 'lost_deal_reason',
-        'Полное наименование организации' => 'partner',
-        'Сервисный сбор' => 'service_fee',
-        'Комиссия' => '_commission',
-        'Всего к оплате Клиентом' => '_total_client_pay',
     ];
 
-    $universal = [
-        'Номер сделки' => 'deal_no',
-        'Название сделки' => 'deal_title',
-        'Лид' => 'lead_id',
-        '% участия агента в продаже' => 'agent_sale_participation',
-        'Дата создания сделки' => 'deal_created_at',
-        'Статус сделки' => 'deal_status',
-        'Ответственное лицо' => 'responsible_person',
-        'Тип клиента' => 'client_type',
-        'Клиент' => 'client',
-        'ID клиента' => 'id_client',
-        'Тип карты' => 'card_type',
-        'Полное наименование организации' => 'partner',
-        'Категория' => 'category',
-        'Канал связи' => 'channel',
-        'Маркетинговый канал' => 'lead_source',
-        'Тип запроса' => 'request_type',
-        'Дата оказания услуги' => 'service_date',
-        'Дата платы клиентом' => 'client_paid_at',
-        'Сумма продажи' => 'sales_amount',
-        'Прибыль' => 'profit',
-        'Прибыль без НДС' => 'profit_ex_vat',
-        'Комиссия' => '_commission',
-        'Сервисный сбор' => 'service_fee',
-        'Результат сделки' => 'deal_result',
-        'Причина стадии Сделка проиграна' => 'lost_deal_reason',
-        'Партнер' => 'partner',
+    $dealsExportFormulas = [
+        'sales_amount' => '"Всего к оплате Клиентом"',
+        'profit' => 'NZ("Дополнительная выгода") + NZ("Сервисный сбор") + NZ("Комиссия")',
+        'profit_ex_vat' => 'NZ("Дополнительная выгода") + (NZ("Сервисный сбор") + NZ("Комиссия")) / vat_factor',
+        'sales_amount_after_refund' => '"Всего к оплате Клиентом" - NZ("Сумма возврата клиенту")',
+        'profit_after_refund' => 'NZ("Дополнительная выгода") + NZ("Сервисный сбор") + NZ("Комиссия") - NZ("Возврат клиенту дополнительной выгоды") - NZ("Возврат клиенту сбора РС ТЛС") - NZ("Возврат комиссии поставщика") + NZ("Сбор РС ТЛС за возврат") + NZ("Штраф РС ТЛС за возврат")',
+        'profit_after_refund_ex_vat' => '(NZ("Дополнительная выгода") - NZ("Возврат клиенту дополнительной выгоды")) + (NZ("Сервисный сбор") - NZ("Возврат клиенту сбора РС ТЛС") + NZ("Комиссия") - NZ("Возврат комиссии поставщика") + NZ("Сбор РС ТЛС за возврат") + NZ("Штраф РС ТЛС за возврат")) / vat_factor',
+        'supplier_retained' => 'NZ("Сбор поставщика за возврат") + NZ("Штраф поставщика за возврат")',
     ];
 
     return [
@@ -134,27 +119,31 @@ function default_mapping(): array
             'sheet_hint' => 'TDSheet',
             'fingerprint' => ['Дата операции', 'Агент', 'Поставщик', 'Сумма продажи'],
             'columns' => $columns,
-            'extra_by_header' => ['Тип клиента' => 'client_type'],
+            'extra_by_header' => [
+                'Тип запроса' => 'request_type',
+                'Страна' => 'country',
+                'Город' => 'city',
+                'Отель' => 'hotel',
+                'Дата начала' => 'start_date',
+                'Дата окончания' => 'end_date',
+                'Количество ночей' => 'nights_count',
+                'Количество номеров' => 'rooms_count',
+            ],
         ],
         'bitrix_profiles' => [
             'deals_export' => [
-                'label' => 'Отчет по сделкам (новый)',
+                'label' => 'Б24 NEW — Отчет по сделкам',
                 'sheet_hint' => 'Отчет по сделкам',
                 'fingerprint' => [
                     'ID', 'Ответственный', 'Результат сделки', 'Всего к оплате Клиентом',
                     'Комиссия', 'Сервисный сбор', 'Дата создания', 'Стадия', 'Клиент',
                 ],
                 'headers' => $dealsExport,
-                'enrich' => [
-                    'sales_amount_from' => '_total_client_pay',
-                    'profit_ex_vat_from' => ['_commission', 'service_fee'],
+                'formulas' => $dealsExportFormulas,
+                'vat_rates' => [
+                    ['effective_from' => '1900-01-01', 'factor' => 1.20],
+                    ['effective_from' => '2026-01-01', 'factor' => 1.22],
                 ],
-            ],
-            'universal' => [
-                'label' => 'Универсальный отчёт (старый)',
-                'sheet_hint' => null,
-                'fingerprint' => ['Номер сделки', 'Ответственное лицо', 'Сумма продажи', 'Статус сделки'],
-                'headers' => $universal,
                 'enrich' => [
                     'sales_amount_from' => 'sales_amount',
                     'profit_ex_vat_from' => ['profit_ex_vat'],
@@ -165,8 +154,11 @@ function default_mapping(): array
             'one_c' => array_values(array_unique(array_merge($oneCFields, ['client_type']))),
             'bitrix' => array_values(array_unique(array_merge(
                 array_values($dealsExport),
-                array_values($universal),
-                ['sales_amount', 'profit', 'profit_ex_vat', 'date_for_sales', 'date_fallback_used', 'source', 'bitrix_format']
+                array_keys($dealsExportFormulas),
+                [
+                    'vat_factor',
+                    'date_for_sales', 'date_fallback_used', 'source', 'bitrix_format',
+                ]
             ))),
         ],
     ];
@@ -206,6 +198,24 @@ function normalize_mapping(array $data): array
     }
     if (!isset($data['bitrix_profiles']) || !is_array($data['bitrix_profiles'])) {
         $data['bitrix_profiles'] = $base['bitrix_profiles'];
+    }
+    foreach ($data['bitrix_profiles'] as $pid => $profile) {
+        if (!is_array($profile)) {
+            continue;
+        }
+        if (!isset($profile['formulas']) || !is_array($profile['formulas'])) {
+            $profile['formulas'] = [];
+        }
+        $normFormulas = [];
+        foreach ($profile['formulas'] as $field => $expr) {
+            $f = clean_str(is_string($field) ? $field : null);
+            $e = is_string($expr) ? trim($expr) : '';
+            if ($f !== null && $e !== '') {
+                $normFormulas[$f] = $e;
+            }
+        }
+        $profile['formulas'] = $normFormulas;
+        $data['bitrix_profiles'][$pid] = $profile;
     }
     if (!isset($data['canonical_fields']) || !is_array($data['canonical_fields'])) {
         $data['canonical_fields'] = $base['canonical_fields'];
@@ -252,8 +262,63 @@ function validate_mapping(array $data): array
         if (!is_array($headers) || $headers === []) {
             $warnings[] = 'bitrix_profiles.' . $pid . ': headers пуст';
         }
+        require_once __DIR__ . '/mapping_formula.php';
+        $formulas = $profile['formulas'] ?? [];
+        if (is_array($formulas)) {
+            foreach ($formulas as $field => $expr) {
+                if (!is_string($expr) || !mapping_formula_syntax_ok($expr)) {
+                    $warnings[] = 'bitrix_profiles.' . $pid . ': некорректная формула для ' . $field;
+                    continue;
+                }
+                if (preg_match_all('/"([^"]+)"/u', $expr, $matches)) {
+                    foreach ($matches[1] as $header) {
+                        if (!array_key_exists($header, $headers)) {
+                            $warnings[] = 'bitrix_profiles.' . $pid . ': формула ' . $field
+                                . ' ссылается на неизвестный заголовок «' . $header . '»';
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $oneFields = [];
+    foreach (($data['one_c']['columns'] ?? []) as $row) {
+        if (is_array($row) && is_string($row['field'] ?? null)) {
+            $oneFields[] = $row['field'];
+        }
+    }
+    foreach (['date_operation', 'agent', 'client_type', 'channel', 'category', 'deal_no', 'sales_amount', 'profit_ex_vat'] as $field) {
+        if (!in_array($field, $oneFields, true)) {
+            $warnings[] = 'one_c: отсутствует обязательное поле ' . $field;
+        }
+    }
+    $newHeaders = $data['bitrix_profiles']['deals_export']['headers'] ?? [];
+    $newFields = is_array($newHeaders) ? array_values($newHeaders) : [];
+    foreach (['deal_no', 'deal_created_at', 'agent', 'deal_result', 'deal_status', 'category', 'client', 'client_id'] as $field) {
+        if (!in_array($field, $newFields, true)) {
+            $warnings[] = 'deals_export: отсутствует обязательное поле ' . $field;
+        }
+    }
+    $newFormulas = $data['bitrix_profiles']['deals_export']['formulas'] ?? [];
+    foreach (['sales_amount', 'profit', 'profit_ex_vat', 'sales_amount_after_refund', 'profit_after_refund_ex_vat'] as $field) {
+        if (!is_array($newFormulas) || !isset($newFormulas[$field])) {
+            $warnings[] = 'deals_export: отсутствует формула ' . $field;
+        }
     }
     return $warnings;
+}
+
+/** Ошибки, при которых маппинг нельзя безопасно сохранять. */
+function mapping_validation_errors(array $warnings): array
+{
+    return array_values(array_filter($warnings, static function (string $warning): bool {
+        return str_contains($warning, 'некорректная формула')
+            || str_contains($warning, 'неизвестный заголовок')
+            || str_contains($warning, 'дублируется index')
+            || str_contains($warning, 'строка без index или field')
+            || str_contains($warning, 'отсутствует обязательное поле')
+            || str_contains($warning, 'отсутствует формула');
+    }));
 }
 
 function backup_mapping(): string
@@ -391,6 +456,28 @@ function bitrix_header_aliases_for_profile(string $profileId, ?array $mapping = 
     return $out;
 }
 
+/** @return array<string, string> field => formula expression */
+function bitrix_formulas_for_profile(string $profileId, ?array $mapping = null): array
+{
+    $profile = bitrix_mapping_profile($profileId, $mapping);
+    if ($profile === null) {
+        return [];
+    }
+    $formulas = $profile['formulas'] ?? [];
+    if (!is_array($formulas)) {
+        return [];
+    }
+    $out = [];
+    foreach ($formulas as $field => $expr) {
+        $f = clean_str(is_string($field) ? $field : null);
+        $e = is_string($expr) ? trim($expr) : '';
+        if ($f !== null && $e !== '') {
+            $out[$f] = $e;
+        }
+    }
+    return $out;
+}
+
 /** @return list<string> */
 function bitrix_fingerprint_for_profile(string $profileId, ?array $mapping = null): array
 {
@@ -489,7 +576,7 @@ function mapping_field_kind(string $field): string
         $kinds = [];
         foreach ([
             'date_operation', 'case_status_change_date', 'payment_date', 'realization_date',
-            'service_date',
+            'service_date', 'start_date', 'end_date',
         ] as $f) {
             $kinds[$f] = 'date';
         }
@@ -504,7 +591,22 @@ function mapping_field_kind(string $field): string
             'markup', 'vat_markup', 'service_fee', 'vat_fee', 'sr', 'lr',
             'solid_bank_privilege', 'rs_cashback_points', 'points_ax', 'points_imp',
             'cashless', 'against_salary', 'loss_company', 'loss_employee',
-            'calls_count', 'meetings_count', '_commission', '_total_client_pay',
+            'calls_count', 'meetings_count', 'adults_count', 'children_count', 'nights_count',
+            'total_nights', 'rooms_count', 'payment_rate', 'net_rub', 'net_supplier_currency',
+            'additional_benefit', 'additional_benefit_currency', 'supplier_fee',
+            'supplier_fee_currency', 'service_fee_currency', 'commission', 'commission_currency',
+            'total_paid_by_client', 'total_supplier_pay', 'total_supplier_pay_currency',
+            'total_client_pay', 'total_client_pay_currency', 'client_refund_amount',
+            'supplier_refund_amount', 'supplier_refund_currency', 'commission_refund',
+            'commission_refund_currency', 'supplier_fee_refund', 'supplier_fee_refund_currency',
+            'service_fee_refund', 'service_fee_refund_currency', 'additional_benefit_refund',
+            'additional_benefit_refund_currency', 'supplier_return_fee',
+            'supplier_return_fee_currency', 'supplier_return_penalty',
+            'supplier_return_penalty_currency', 'rstls_return_fee',
+            'rstls_return_fee_currency', 'rstls_return_penalty',
+            'rstls_return_penalty_currency', 'sales_amount_after_refund',
+            'profit_after_refund', 'profit_after_refund_ex_vat', 'supplier_retained',
+            'vat_factor',
         ] as $f) {
             $kinds[$f] = 'number';
         }

@@ -90,6 +90,14 @@ if ($method === 'POST') {
             json_response(['ok' => false, 'error' => 'Нужен объект mapping'], 400);
         }
         $warnings = validate_mapping($mapping);
+        $errors = mapping_validation_errors($warnings);
+        if ($errors !== []) {
+            json_response([
+                'ok' => false,
+                'error' => 'Маппинг не сохранён: ' . implode('; ', $errors),
+                'errors' => $errors,
+            ], 422);
+        }
         try {
             save_mapping($mapping);
         } catch (Throwable $e) {

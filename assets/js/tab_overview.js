@@ -187,6 +187,7 @@ window.TabOverview = {
     var structLabels = {
       category: 'Категория', channel: 'Канал', client_type: 'Тип клиента',
       card_type: 'Тип карты', request_type: 'Тип запроса', partner: 'Партнёр',
+      country: 'Страна', city: 'Город', hotel: 'Отель',
     };
     var structKeys = Object.keys(structLabels);
     document.getElementById('ov-structure-grid').innerHTML = structKeys.map(function (key) {

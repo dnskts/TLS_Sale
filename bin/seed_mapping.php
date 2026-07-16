@@ -28,7 +28,12 @@ if (is_file($oneCPath)) {
 }
 
 $oneCColumns = [];
-foreach ($fieldList as $i => $field) {
+foreach ($oneCBaseCols as $baseRow) {
+    $field = (string) ($baseRow['field'] ?? '');
+    $i = (int) ($baseRow['index'] ?? -1);
+    if ($field === '' || $i < 0) {
+        continue;
+    }
     $header = $oneCLabels[$field] ?? $field;
     if (isset($oneCSampleHeaders[$i]) && $oneCSampleHeaders[$i] !== '') {
         $header = $oneCSampleHeaders[$i];
@@ -42,18 +47,19 @@ foreach ($fieldList as $i => $field) {
 }
 
 $dealsExportHeaders = $base['bitrix_profiles']['deals_export']['headers'];
-$universalHeaders = $base['bitrix_profiles']['universal']['headers'];
 
 $mapping = $base;
 $mapping['one_c']['columns'] = $oneCColumns;
 $mapping['bitrix_profiles']['deals_export']['headers'] = $dealsExportHeaders;
-$mapping['bitrix_profiles']['universal']['headers'] = $universalHeaders;
 $mapping['canonical_fields'] = [
-    'one_c' => array_values(array_unique(array_merge($fieldList, ['client_type']))),
+    'one_c' => array_values(array_unique(array_merge(
+        $fieldList,
+        array_values($base['one_c']['extra_by_header'] ?? [])
+    ))),
     'bitrix' => array_values(array_unique(array_merge(
         array_values($dealsExportHeaders),
-        array_values($universalHeaders),
-        ['sales_amount', 'profit', 'profit_ex_vat', 'date_for_sales', 'date_fallback_used', 'source', 'bitrix_format']
+        array_keys($base['bitrix_profiles']['deals_export']['formulas'] ?? []),
+        ['vat_factor', 'date_for_sales', 'date_fallback_used', 'source', 'bitrix_format']
     ))),
 ];
 
@@ -67,4 +73,3 @@ file_put_contents($path, $json . "\n");
 echo "Wrote $path (" . strlen($json) . " bytes)\n";
 echo "one_c columns: " . count($oneCColumns) . "\n";
 echo "deals_export headers: " . count($dealsExportHeaders) . "\n";
-echo "universal headers: " . count($universalHeaders) . "\n";

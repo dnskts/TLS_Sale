@@ -77,6 +77,9 @@ function build_sales_rollup(array $unified): array
             clean_str($row['client'] ?? null),
             clean_str($row['partner_or_supplier'] ?? null),
             clean_str($row['request_type'] ?? null),
+            clean_str($row['country'] ?? null),
+            clean_str($row['city'] ?? null),
+            clean_str($row['hotel'] ?? null),
         ]);
         if (!isset($map[$key])) {
             $map[$key] = [
@@ -93,6 +96,9 @@ function build_sales_rollup(array $unified): array
                 'cl' => clean_str($row['client'] ?? null),
                 'pt' => clean_str($row['partner_or_supplier'] ?? null),
                 'rt' => clean_str($row['request_type'] ?? null),
+                'country' => clean_str($row['country'] ?? null),
+                'city' => clean_str($row['city'] ?? null),
+                'hotel' => clean_str($row['hotel'] ?? null),
                 'sales' => 0.0,
                 'profit' => 0.0,
                 'n' => 0,
@@ -115,9 +121,9 @@ function build_ops_rollup(array $ops, array $settings): array
 {
     $map = [];
     foreach ($ops as $row) {
-        $resolved = resolve_agent_1c($row['agent'] ?? null, $settings, $row['department'] ?? null);
+        $resolved = resolve_agent_1c($row['agent'] ?? null, $settings, $row['client_type'] ?? null);
         $teams = $resolved['teams'] ?? [$resolved['team']];
-        $category = clean_str($row['related_service_type'] ?? null) ?? clean_str($row['category'] ?? null);
+        $category = clean_str($row['category'] ?? null);
         $sales = (float) ($row['sales_amount'] ?? 0);
         $isRefund = $sales < 0;
         $key = rollup_bucket_key([
@@ -130,7 +136,8 @@ function build_ops_rollup(array $ops, array $settings): array
             clean_str($row['client'] ?? null),
             clean_str($row['supplier'] ?? null),
             clean_str($row['card_type'] ?? null),
-            clean_str($row['department'] ?? null),
+            clean_str($row['client_type'] ?? null),
+            clean_str($row['request_type'] ?? null),
             $isRefund ? 'refund' : 'sale',
             !empty($row['payment_date']) ? '1' : '0',
         ]);
@@ -145,7 +152,8 @@ function build_ops_rollup(array $ops, array $settings): array
                 'cl' => clean_str($row['client'] ?? null),
                 'pt' => clean_str($row['supplier'] ?? null),
                 'card' => clean_str($row['card_type'] ?? null),
-                'dep' => clean_str($row['department'] ?? null),
+                'ct' => clean_str($row['client_type'] ?? null),
+                'rt' => clean_str($row['request_type'] ?? null),
                 'ref' => $isRefund ? 1 : 0,
                 'has_pay' => !empty($row['payment_date']) ? 1 : 0,
                 'sales' => 0.0,
@@ -166,11 +174,11 @@ function build_deals_rollup(array $deals, array $settings): array
 {
     $map = [];
     foreach ($deals as $row) {
-        $resolved = resolve_agent_bitrix($row['responsible_person'] ?? null, $settings);
+        $resolved = resolve_agent_bitrix($row['agent'] ?? null, $settings);
         $teams = $resolved['teams'] ?? [$resolved['team']];
         $created = $row['deal_created_at'] ?? null;
         $day = $created ? substr((string) $created, 0, 10) : '';
-        $paid = $row['client_paid_at'] ?? null;
+        $paid = $row['date_operation'] ?? null;
         $paidDay = $paid ? substr((string) $paid, 0, 10) : '';
         $key = rollup_bucket_key([
             $day,
@@ -181,7 +189,7 @@ function build_deals_rollup(array $deals, array $settings): array
             clean_str($row['category'] ?? null),
             clean_str($row['channel'] ?? null),
             clean_str($row['client'] ?? null),
-            clean_str($row['partner'] ?? null),
+            clean_str($row['supplier'] ?? null),
             clean_str($row['card_type'] ?? null),
             clean_str($row['client_type'] ?? null),
             clean_str($row['request_type'] ?? null),
@@ -200,7 +208,7 @@ function build_deals_rollup(array $deals, array $settings): array
                 'cat' => clean_str($row['category'] ?? null),
                 'ch' => clean_str($row['channel'] ?? null),
                 'cl' => clean_str($row['client'] ?? null),
-                'pt' => clean_str($row['partner'] ?? null),
+                'pt' => clean_str($row['supplier'] ?? null),
                 'card' => clean_str($row['card_type'] ?? null),
                 'ct' => clean_str($row['client_type'] ?? null),
                 'rt' => clean_str($row['request_type'] ?? null),
@@ -341,6 +349,9 @@ function sales_rollup_to_row(array $b): array
         'client' => $b['cl'] ?? null,
         'partner_or_supplier' => $b['pt'] ?? null,
         'request_type' => $b['rt'] ?? null,
+        'country' => $b['country'] ?? null,
+        'city' => $b['city'] ?? null,
+        'hotel' => $b['hotel'] ?? null,
         'sales_amount' => (float) ($b['sales'] ?? 0),
         'profit_ex_vat' => (float) ($b['profit'] ?? 0),
         'rollup_n' => max(1, (int) ($b['n'] ?? 1)),
@@ -360,13 +371,13 @@ function ops_rollup_to_row(array $b): array
         'agent_key' => $b['ak'] ?? '',
         'agent_team' => $b['at'] ?? '',
         'agent_teams' => $b['ats'] ?? [($b['at'] ?? '')],
-        'related_service_type' => $b['cat'] ?? null,
         'category' => $b['cat'] ?? null,
         'channel' => $b['ch'] ?? null,
         'client' => $b['cl'] ?? null,
         'supplier' => $b['pt'] ?? null,
         'card_type' => $b['card'] ?? null,
-        'department' => $b['dep'] ?? null,
+        'client_type' => $b['ct'] ?? null,
+        'request_type' => $b['rt'] ?? null,
         'sales_amount' => $sales,
         'profit_ex_vat' => (float) ($b['profit'] ?? 0),
         'payment_date' => !empty($b['has_pay']) ? '1' : null,
@@ -381,7 +392,7 @@ function deals_rollup_to_row(array $b): array
     $paidDay = $b['paid_d'] ?? null;
     return [
         'deal_created_at' => $day ? $day . 'T00:00:00' : null,
-        'client_paid_at' => $paidDay ? $paidDay . 'T00:00:00' : null,
+        'date_operation' => $paidDay ?: null,
         'agent_key' => $b['ak'] ?? '',
         'agent_display' => $b['ad'] ?? ($b['ak'] ?? ''),
         'agent_team' => $b['at'] ?? '',
@@ -389,7 +400,7 @@ function deals_rollup_to_row(array $b): array
         'category' => $b['cat'] ?? null,
         'channel' => $b['ch'] ?? null,
         'client' => $b['cl'] ?? null,
-        'partner' => $b['pt'] ?? null,
+        'supplier' => $b['pt'] ?? null,
         'card_type' => $b['card'] ?? null,
         'client_type' => $b['ct'] ?? null,
         'request_type' => $b['rt'] ?? null,

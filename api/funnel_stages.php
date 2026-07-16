@@ -29,7 +29,7 @@ if ($source === '1c') {
         } else {
             $positive += $w;
         }
-        $dept = clean_str($row['department'] ?? null) ?? 'Не указано';
+        $dept = clean_str($row['client_type'] ?? null) ?? 'Не указано';
         $departments[$dept] = ($departments[$dept] ?? 0) + $w;
     }
     arsort($departments);

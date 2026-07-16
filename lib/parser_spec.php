@@ -18,8 +18,8 @@ function parser_spec_one_c(): array
     $notes = [
         'date_operation' => 'Колонка по индексу 0 (первая «Дата операции» в Excel)',
         'agent' => 'Сопоставление с settings.json → names_1c',
-        'department' => 'Для unknown-агентов — department_map',
-        'related_service_type' => 'Приоритет категории в unified',
+        'client_type' => '1С: Подразделение; Б24: Тип клиента',
+        'category' => '1С: Связанный вид услуги; Б24: Категория',
         'sales_amount' => 'Отрицательные значения → is_refund',
     ];
     $out = [];
@@ -44,10 +44,10 @@ function parser_spec_bitrix(): array
     $mapping = load_mapping();
     $notes = [
         'deal_no' => 'ID / Номер сделки',
-        'responsible_person' => 'Ответственный → names_bitrix',
+        'agent' => '1С: Агент; Б24: Ответственный → names_bitrix',
         'deal_result' => 'В unified: «Успех» + стадии возврата',
-        'sales_amount' => 'Из enrich.sales_amount_from',
-        'profit_ex_vat' => 'Из enrich.profit_ex_vat_from',
+        'sales_amount' => 'Формула из Всего к оплате Клиентом',
+        'profit_ex_vat' => 'Формула с дополнительной выгодой и коэффициентом НДС',
     ];
     $out = [];
     foreach (($mapping['bitrix_profiles'] ?? []) as $pid => $profile) {
@@ -63,6 +63,17 @@ function parser_spec_bitrix(): array
                 'header' => (string) $header,
                 'field' => $field,
                 'note' => ($notes[$field] ?? '') . ' [' . $label . ']',
+                'profile' => (string) $pid,
+            ];
+        }
+        foreach (($profile['formulas'] ?? []) as $field => $formula) {
+            if (!is_string($field) || !is_string($formula)) {
+                continue;
+            }
+            $out[] = [
+                'header' => '= ' . $formula,
+                'field' => $field,
+                'note' => 'Расчётное поле [' . $label . ']',
                 'profile' => (string) $pid,
             ];
         }
@@ -87,26 +98,27 @@ function parser_spec_unified(): array
 {
     return [
         ['field' => 'source', 'label' => 'Источник', 'sources' => '1c / bitrix', 'note' => ''],
-        ['field' => 'date', 'label' => 'Дата', 'sources' => '1c: date_operation; bitrix: client_paid_at или deal_created_at', 'note' => ''],
+        ['field' => 'date', 'label' => 'Дата', 'sources' => '1c: Дата операции; bitrix: Дата оплаты клиентом', 'note' => 'Дата создания используется только для воронки'],
         ['field' => 'agent_key', 'label' => 'Ключ агента', 'sources' => 'resolve_agent_*', 'note' => 'unknown:… если не найден в справочнике'],
         ['field' => 'agent_display', 'label' => 'Имя агента', 'sources' => 'name_display из settings', 'note' => ''],
         ['field' => 'agent_team', 'label' => 'Основная команда', 'sources' => 'teams[0] агента', 'note' => 'Для KPI и отображения'],
         ['field' => 'agent_teams', 'label' => 'Все команды', 'sources' => 'teams[] агента', 'note' => 'Фильтр по команде: пересечение'],
         ['field' => 'agent_is_active', 'label' => 'Активен', 'sources' => 'settings', 'note' => ''],
-        ['field' => 'agent_raw', 'label' => 'Имя в выгрузке', 'sources' => '1c: agent; bitrix: responsible_person', 'note' => ''],
+        ['field' => 'agent_raw', 'label' => 'Имя в выгрузке', 'sources' => 'agent: Агент / Ответственный', 'note' => ''],
         ['field' => 'client', 'label' => 'Клиент', 'sources' => '1c / bitrix', 'note' => ''],
-        ['field' => 'client_id', 'label' => 'ID клиента', 'sources' => '1c: id_crm; bitrix: id_client', 'note' => ''],
-        ['field' => 'partner_or_supplier', 'label' => 'Партнёр / поставщик', 'sources' => '1c: supplier; bitrix: partner', 'note' => ''],
-        ['field' => 'category', 'label' => 'Категория', 'sources' => '1c: related_service_type|category; bitrix: category', 'note' => 'Синонимы: settings.category_aliases'],
+        ['field' => 'client_id', 'label' => 'ID клиента', 'sources' => 'client_id: I d CRM / ID клиента', 'note' => ''],
+        ['field' => 'partner_or_supplier', 'label' => 'Партнёр / поставщик', 'sources' => 'supplier: Поставщик / Компания', 'note' => ''],
+        ['field' => 'category', 'label' => 'Категория', 'sources' => 'category: Связанный вид услуги / Категория', 'note' => 'Синонимы: settings.category_aliases'],
         ['field' => 'channel', 'label' => 'Канал', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'card_type', 'label' => 'Тип карты', 'sources' => '1c / bitrix', 'note' => ''],
-        ['field' => 'client_type', 'label' => 'Тип клиента', 'sources' => '1c extra_by_header / bitrix', 'note' => ''],
+        ['field' => 'client_type', 'label' => 'Тип клиента', 'sources' => '1c: department; bitrix: client_type', 'note' => 'Подразделение 1С = Тип клиента Б24'],
         ['field' => 'request_type', 'label' => 'Тип запроса', 'sources' => 'bitrix; 1c via category_to_request_type', 'note' => ''],
         ['field' => 'sales_amount', 'label' => 'Сумма продажи', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'profit_ex_vat', 'label' => 'Прибыль без НДС', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'service_fee', 'label' => 'Сервисный сбор', 'sources' => '1c / bitrix', 'note' => ''],
         ['field' => 'is_refund', 'label' => 'Возврат', 'sources' => '1c: sales_amount < 0; bitrix: стадии возврата', 'note' => ''],
-        ['field' => 'raw_id', 'label' => 'ID строки', 'sources' => '1c: order_no; bitrix: deal_no', 'note' => ''],
-        ['field' => 'date_fallback_used', 'label' => 'Fallback даты', 'sources' => 'bitrix', 'note' => 'true, если взята deal_created_at'],
+        ['field' => 'raw_id', 'label' => 'Номер сделки / заказа', 'sources' => 'deal_no: Заказ / ID', 'note' => ''],
+        ['field' => 'service_date', 'label' => 'Дата услуги', 'sources' => '1c: realization_date; bitrix: service_date', 'note' => 'Дата реализации = дата оказания услуги'],
+        ['field' => 'date_fallback_used', 'label' => 'Fallback даты', 'sources' => 'bitrix', 'note' => 'Всегда false: fallback финансовой даты запрещён'],
     ];
 }

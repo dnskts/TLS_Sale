@@ -21,8 +21,8 @@
             "Возврат подтверждён",
             "Возврат"
         ],
-        "bitrix_date_field": "client_paid_at",
-        "bitrix_date_fallback": "deal_created_at",
+        "bitrix_date_field": "date_operation",
+        "bitrix_date_fallback": "",
         "one_c_date_field": "date_operation"
     },
     "defaults": {

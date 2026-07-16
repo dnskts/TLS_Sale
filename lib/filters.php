@@ -45,6 +45,9 @@ function apply_sales_filters(array $rows, array $filters): array
     $out = [];
     foreach ($rows as $row) {
         $date = $row['date'] ?? null;
+        if (($dateFrom || $dateTo) && !$date) {
+            continue;
+        }
         if ($dateFrom && $date && $date < $dateFrom) {
             continue;
         }
@@ -138,7 +141,7 @@ function apply_deals_bitrix_filters(array $rows, array $filters): array
     $enriched = [];
     foreach ($rows as $row) {
         if (!isset($row['agent_key'])) {
-            $resolved = resolve_agent_bitrix($row['responsible_person'] ?? null, $settings);
+            $resolved = resolve_agent_bitrix($row['agent'] ?? null, $settings);
             $row['agent_key'] = $resolved['agent_key'];
             $row['agent_display'] = $resolved['name_display'];
             $row['agent_team'] = $resolved['team'];
@@ -179,7 +182,7 @@ function apply_deals_bitrix_filters_on_enriched(array $enriched, array $filters)
                 'channel' => $row['channel'] ?? null,
                 'request_type' => $row['request_type'] ?? null,
                 'client' => $row['client'] ?? null,
-                'partner_or_supplier' => $row['partner'] ?? null,
+                'partner_or_supplier' => $row['supplier'] ?? null,
                 'card_type' => $row['card_type'] ?? null,
                 'client_type' => $row['client_type'] ?? null,
             ]],
@@ -202,7 +205,7 @@ function apply_operations_1c_filters(array $rows, array $filters): array
     $enriched = [];
     foreach ($rows as $row) {
         if (!isset($row['agent_key'])) {
-            $resolved = resolve_agent_1c($row['agent'] ?? null, $settings, $row['department'] ?? null);
+            $resolved = resolve_agent_1c($row['agent'] ?? null, $settings, $row['client_type'] ?? null);
             $row['agent_key'] = $resolved['agent_key'];
             $row['agent_display'] = $resolved['name_display'];
             $row['agent_team'] = $resolved['team'];
@@ -230,7 +233,7 @@ function apply_operations_1c_filters_on_enriched(array $enriched, array $filters
         if ($dateTo && $day && $day > $dateTo) {
             continue;
         }
-        $category = clean_str($row['related_service_type'] ?? null) ?? clean_str($row['category'] ?? null);
+        $category = clean_str($row['category'] ?? null);
         $tmp = apply_sales_filters(
             [[
                 'date' => $day,
@@ -244,7 +247,7 @@ function apply_operations_1c_filters_on_enriched(array $enriched, array $filters
                 'client' => $row['client'] ?? null,
                 'partner_or_supplier' => $row['supplier'] ?? null,
                 'client_type' => $row['client_type'] ?? null,
-                'request_type' => null,
+                'request_type' => $row['request_type'] ?? null,
             ]],
             array_merge($filters, ['source' => 'all'])
         );
@@ -295,15 +298,13 @@ function apply_operations_1c_drill_filters(array $rows, array $filters): array
     $out = [];
     foreach ($rows as $row) {
         if (!empty($filters['department'])) {
-            $actual = clean_str($row['department'] ?? null) ?? 'Не указан';
+            $actual = clean_str($row['client_type'] ?? null) ?? 'Не указан';
             if ($actual !== $filters['department']) {
                 continue;
             }
         }
         if (!empty($filters['category'])) {
-            $actual = clean_str($row['related_service_type'] ?? null)
-                ?? clean_str($row['category'] ?? null)
-                ?? 'Не указана';
+            $actual = clean_str($row['category'] ?? null) ?? 'Не указана';
             if ($actual !== $filters['category']) {
                 continue;
             }

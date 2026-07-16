@@ -35,9 +35,9 @@ foreach ($rows as $row) {
     $status = clean_str($row['deal_status'] ?? null) ?? 'Не указан';
     $statuses[$status] = ($statuses[$status] ?? 0) + $w;
 
-    if (!empty($row['client_paid_at'])) {
+    if (!empty($row['date_operation'])) {
         $withPaid += $w;
-        $paidDay = substr((string) $row['client_paid_at'], 0, 10);
+        $paidDay = substr((string) $row['date_operation'], 0, 10);
         $ok = true;
         if ($dateFrom && $paidDay < $dateFrom) {
             $ok = false;

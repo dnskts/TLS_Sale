@@ -7,6 +7,9 @@ window.TabStructure = {
     card_type: 'Тип карты',
     request_type: 'Тип запроса',
     partner: 'Партнёр / поставщик',
+    country: 'Страна',
+    city: 'Город',
+    hotel: 'Отель',
   },
 
   async render(root, ctx) {

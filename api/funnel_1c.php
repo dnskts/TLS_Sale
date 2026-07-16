@@ -34,11 +34,11 @@ foreach ($rows as $row) {
     if (!empty($row['payment_date'])) {
         $withPayment += $w;
     }
-    $cat = clean_str($row['related_service_type'] ?? null) ?? clean_str($row['category'] ?? null) ?? 'Не указана';
+    $cat = clean_str($row['category'] ?? null) ?? 'Не указана';
     $categories[$cat] = ($categories[$cat] ?? 0) + $w;
     $ch = clean_str($row['channel'] ?? null) ?? 'Не указан';
     $channels[$ch] = ($channels[$ch] ?? 0) + $w;
-    $dep = clean_str($row['department'] ?? null) ?? 'Не указан';
+    $dep = clean_str($row['client_type'] ?? null) ?? 'Не указан';
     $departments[$dep] = ($departments[$dep] ?? 0) + $w;
 
     $day = $row['date_operation'] ?? null;
